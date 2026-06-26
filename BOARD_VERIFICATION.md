@@ -432,6 +432,28 @@ city side and is freely passable to Arsunt / Shield Wall #2 / Broken Land. So th
 to the cities via s4_16. Only s4_15↔s4_16 is sealed here. (Revisit full §4 extent when tracing s5/s8.)
 **s4 fully resolved.**
 
+### 3a-s8. Sector s8 (NW-inner, 9 areas) — PARTIAL (dense mountain core; needs your direct lists)
+✅ clear/known · 🟡 guess. Pre-known: s8_3 COMPLETE (§3a) · shield_wall_2↔{arsunt, hagga_basin} (§3a) ·
+wind_pass↔{north_pole, splintered_rock} (§3a) · s8_1↔{s4_13, s4_14} & s4↔s8 ties (§3a-s4) ·
+shield_wall_2↔{s4_15, s4_16} & s4_16↔arsunt (§3a-s4). Areas: s8_1, s8_2, s8_3, s8_4, arsunt, hagga_basin,
+splintered_rock, shield_wall_2, wind_pass. Layout (center-west.jpg): s8_1 NW (W=air zone s4_13, E=Shield Wall #2
+red), s8_2 mtn on Splintered Rock massif, s8_3 SW junction, s8_4 S by Wind Pass; cities/Splintered Rock to the E.
+```
+s8_1:    s8_3 ✅, s4_13 ✅, s4_14 ✅, s8_2 🟡          # E border = Shield Wall #2 = RED impassable? — Q
+s8_2:    s8_4 ✅, s8_1 🟡, s8_3 🟡, splintered_rock 🟡, hagga_basin 🟡   # unnamed MOUNTAIN area
+s8_3:    bight_of_the_cliff ✅, s4_12 ✅, s4_13 ✅, s8_1 ✅, s8_4 ✅, s3_3 ✅, s7_1 ✅   # COMPLETE
+s8_4:    s8_3 ✅, s8_2 ✅, splintered_rock 🟡, wind_pass 🟡
+arsunt:        shield_wall_2 ✅, s4_16 ✅, carthag 🟡, hagga_basin 🟡, broken_land 🟡   # city I
+hagga_basin:   shield_wall_2 ✅, splintered_rock 🟡, s8_2 🟡, carthag 🟡, imperial_basin 🟡, arsunt 🟡, north_pole 🟡   # city I; air zone to Imperial Basin
+splintered_rock: wind_pass ✅, s8_2 🟡, s8_4 🟡, hagga_basin 🟡, hole_in_the_rock 🟡, north_pole 🟡, false_wall_east 🟡, false_wall_west 🟡
+shield_wall_2: arsunt ✅, hagga_basin ✅, s4_15 ✅, s4_16 ✅            # W border (s8_1/s4_13 side) = RED impassable §4
+wind_pass:     north_pole ✅, splintered_rock ✅, s8_4 🟡, false_wall_west 🟡
+```
+**Open s8 questions (batched):** s8_1: is its E border (Shield Wall #2) red/impassable, and does s8_1↔s8_2? ·
+s8_2 neighbours (s8_1? s8_3? splintered_rock? hagga_basin?) · s8_4↔splintered_rock? s8_4↔wind_pass? ·
+wind_pass↔{s8_4, false_wall_west}? · For the city/mtn hub (arsunt, hagga_basin, splintered_rock) please give
+direct neighbour lists like you did for s8_3.
+
 ### 3b. Earlier photo-based DRAFT (UNVERIFIED — my geography proved unreliable; supersede with 3a)
 
 ```
