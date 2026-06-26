@@ -351,6 +351,33 @@ tasmin_sink: s2_1 ✅, s2_3 ✅, s2_5 ✅, s2_6 ✅, pasty_mesa ✅   # non-deep
 confirm when finalising s1/s2 seam. Note: s2↔s6 is air-zone-only at Pasty Mesa; other s2/s6 air-zone
 straddles to catalogue in §5.
 
+### 3a-s3. Sector s3 (SW-outer) — PHOTO-TRACED DRAFT (from south-west.jpg)
+✅ = clear white border, 🟡 = likely. W edge (left) = Supremacy track; S edge = bottom; pole = upper-right.
+Already pinned by user's §3a `s8_3` line: **s3_3 ↔ s7_1 ✅ and s3_3 ↔ s8_3 ✅** (the s3/s4/s7/s8 4-sector junction).
+Spatial layout (SW quadrant):
+```
+   [W edge]                         [air-zone band / s7 inner →]
+   s3_1   s3_2   s3_3 ──(s7_1, s8_3 junction)
+          habbanya     s3_5    s3_8 (air zone → s7)
+   s3_4   s3_6   s3_7   s3_9
+   [S edge bottom]
+```
+```
+s3_1:    s3_2 ✅, habbanya_ridge ✅, s3_4 ✅           # W edge; N→ s4 across W edge? — Q
+s3_2:    s3_1 ✅, s3_3 ✅, habbanya_ridge ✅           # N = air-zone band (s7)
+s3_3:    s3_2 ✅, s3_5 ✅, s7_1 ✅, s8_3 ✅, habbanya_ridge 🟡   # 4-sector junction (s3/s4/s7/s8)
+s3_4:    s3_1 ✅, s3_6 ✅, habbanya_ridge 🟡           # W + S edges
+s3_5:    s3_3 ✅, habbanya_ridge ✅, s3_6 ✅, s3_8 ✅, s3_7 🟡
+s3_6:    s3_4 ✅, s3_5 ✅, s3_7 ✅, habbanya_ridge 🟡   # S edge
+s3_7:    s3_6 ✅, s3_8 ✅, s3_9 ✅, s3_5 🟡             # S edge
+s3_8:    s3_5 ✅, s3_7 ✅, s3_9 ✅                      # by air zone → s7 (False Wall West / Windgap)
+s3_9:    s3_7 ✅, s3_8 ✅                              # S edge; NO s2 link (air zone, per s2 trace); → s7 band
+habbanya_ridge: s3_1 ✅, s3_2 ✅, s3_5 ✅, s3_3 🟡, s3_4 🟡, s3_6 🟡   # non-deep desert sietch
+```
+**Open s3 questions (batched):** which of s3_3/s3_4/s3_6 actually touch Habbanya Ridge? · s3_5↔s3_7? ·
+s3↔s4 white border across the W edge (s3_1/s3_2 ↔ an s4 area)? · besides s3_3↔s7_1, any s3↔s7 ground
+crossing at s3_8/s3_9, or air-zone-only?
+
 ### 3b. Earlier photo-based DRAFT (UNVERIFIED — my geography proved unreliable; supersede with 3a)
 
 ```
