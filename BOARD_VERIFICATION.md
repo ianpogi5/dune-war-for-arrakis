@@ -210,6 +210,14 @@ reference; the real positional `s#_N` ids get assigned as we trace each sector. 
   bottom-right (by an air zone) · **Gara Kulon** (board spelling **"Cara Kulon"**) center, green
   triangle, **adjacent to Shield Wall #1 (s5)** — visually confirms the s5 shield_wall↔gara_kulon edge.
   ✅ **s1 fully located: s1_1..s1_16 + Sihaya Ridge + Gara Kulon = 18.**
+- `s2` (SE-out, 10): from `south-east.jpg`. s2_1 top-center · s2_2 top-right (by prescience track) ·
+  s2_3 center · s2_4 right (edge) · s2_5 left (by Pasty Mesa) · s2_6 bottom-left · s2_7 bottom-center ·
+  s2_8 center-left (by air zone) · **Pasty Mesa** left ridge (plt) · **Tasmin Sink** center-left green
+  triangle. ✅ s2_1..s2_8 + Pasty Mesa + Tasmin Sink = 10.
+- `s6` (SE-in, 9): from `south-east.jpg`. s6_1 center-left · s6_2 top-right (N of False Wall East) ·
+  s6_3 center-right · s6_4 center-bottom (S of False Wall South) · s6_5 bottom-left · **False Wall East**
+  (mtn ridge) · **False Wall South** (plt ridge) · **Harg Pass** (minor erg) · **Hobars Gap** (green
+  triangle sietch) · `np` North Pole (top-left). ✅ s6_1..s6_5 + 4 named = 9.
 
 **Outer**
 - `s1` NE-out (18): **Sihaya Ridge** =`s1_dd1` + `s1_dd2..7` · **Gara Kulon** =`s1_nd1` + `s1_nd2..11`  ✅
