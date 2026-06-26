@@ -284,6 +284,41 @@ wind_pass     (s8_nd1):   north_pole (np), splintered_rock (s8_mtn1)
 s8_3:                     bight_of_the_cliff, s4_12, s4_13, s8_1, s8_4, s3_3, s7_1   # COMPLETE (7 nbrs); 4-sector junction
 ```
 
+### 3a-s1. Sector s1 (NE-outer) — PHOTO-TRACED DRAFT (from north-east.jpg + center-east.jpg)
+Traced by Claude from the marked photos; ✅ = clear white border, 🟡 = likely (needs your eye).
+Spatial layout (board N = top):
+```
+   [seam]  s1_1  s1_2            Sihaya   s1_10
+           s1_3  s1_4  s1_5      s1_6  s1_9
+                      (air zone) s1_8
+           s1_7  s1_11  s1_12    s1_13
+                  GaraKulon       s1_14
+                  s1_15  s1_16
+```
+```
+s1_1:    s1_2 ✅, s1_3 ✅, s1_4 🟡            # N-edge area; seam to its W (s4?) — Q1
+s1_2:    s1_1 ✅, s1_4 ✅, s1_5 ✅, s1_6 ✅, sihaya_ridge ✅
+s1_3:    s1_1 ✅, s1_4 ✅                      # seam to its W (s4?) — Q1; S border = Broken Land (impassable §4)
+s1_4:    s1_3 ✅, s1_2 ✅, s1_5 ✅, s1_1 🟡   # S border = Broken Land arc (impassable §4)
+s1_5:    s1_2 ✅, s1_4 ✅, s1_8 ✅, s1_7 ✅, s1_6 🟡   # SW corner = air zone; S = Rimwall West (impassable §4)
+s1_6:    s1_2 ✅, s1_8 ✅, s1_9 ✅, sihaya_ridge ✅, s1_5 🟡
+s1_7:    s1_5 ✅, s1_11 ✅, s1_8 🟡           # W = air zone + Rimwall West (impassable §4)
+s1_8:    s1_5 ✅, s1_6 ✅, s1_9 ✅, s1_12 ✅, s1_11 🟡, s1_7 🟡
+s1_9:    s1_6 ✅, s1_8 ✅, sihaya_ridge ✅, s1_10 ✅, s1_12 ✅, s1_13 ✅
+s1_10:   sihaya_ridge ✅, s1_9 ✅, s1_13 ✅   # NE corner (desert_ne); E-edge (Prescience track)
+s1_11:   s1_7 ✅, s1_8 🟡, s1_12 ✅, gara_kulon ✅, s1_15 🟡
+s1_12:   s1_8 ✅, s1_9 ✅, s1_11 ✅, s1_13 ✅, s1_14 ✅
+s1_13:   s1_9 ✅, s1_10 ✅, s1_12 ✅, s1_14 ✅   # E-edge
+s1_14:   s1_12 ✅, s1_13 ✅, s1_16 ✅, gara_kulon ✅, s1_15 🟡   # E-edge
+sihaya_ridge: s1_2 ✅, s1_6 ✅, s1_9 ✅, s1_10 ✅   # deep-desert sietch
+gara_kulon:   s1_11 ✅, s1_14 ✅, s1_15 ✅, shield_wall_1/s5_mtn4 ✅(§3a)   # + s5_9? — Q on s1↔s5
+s1_15:   gara_kulon ✅, s1_16 ✅, s1_11 🟡, s1_14 🟡   # + s5_9 (Shield Wall side)? sector boundary — Q
+s1_16:   s1_15 ✅, s1_14 ✅                    # SE-ish; S edge → into s5/air-zone band
+```
+**Open s1 questions (batched):** Q1 seam — do s1_1/s1_3 share a white border with any s4 area
+across the central seam? · s1_1↔s1_4? · s1_5↔s1_6? · s1_7↔s1_8? · s1_8↔s1_11? · s1_11↔s1_15? ·
+s1_14↔s1_15? · s1↔s5 crossings near Gara Kulon/s1_15/s1_16 (which are white vs air-zone vs red).
+
 ### 3b. Earlier photo-based DRAFT (UNVERIFIED — my geography proved unreliable; supersede with 3a)
 
 ```

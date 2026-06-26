@@ -38,7 +38,7 @@ Living file: `BOARD_VERIFICATION.md`. Extracted from physical-board photos in `d
 - [x] `deep` (deep-desert) flag per named desert (deep = Sihaya Ridge, Rock Outcroppings, The Great Flat)
 - [x] §2 Sectors (s1–s8 = 4 outer + 4 inner) — every area assigned; **board has 101 areas** (not ~50: plateau/mountain have many unnamed areas too)
 - [x] §2.1/§2.2 all 101 areas have ids + positions (user physically numbered the board `s#_N`; read off the marked `docs/map/*.jpg` tiles)
-- [ ] **§3 Adjacency — IN PROGRESS, the active task.** A few edges done in §3a (shield_wall_1/2, wind_pass, s8_3). Workflow: I trace clear edges + structural facts from the numbered photos, batch ambiguous-edge questions per sector (phone-alert the user), cross-check reciprocity + type counts. NEXT: trace s1.
+- [ ] **§3 Adjacency — IN PROGRESS, the active task.** Earlier edges in §3a (shield_wall_1/2, wind_pass, s8_3). **s1 (NE-outer) now photo-traced** into §3a-s1 (all 18 areas, ✅/🟡 marks + batched open Qs). Workflow: I trace clear edges + structural facts from the numbered photos, batch ambiguous-edge questions per sector (phone-alert the user), cross-check reciprocity + type counts. NEXT: get user answers on the s1 🟡 edges, then trace s2.
 - [ ] §4 Impassable borders (confirmed so far: Shield Wall #2 west; the red arc along Broken Land→Rimwall West north blocks s1↔s5)
 - [ ] §5 Air zones (~8) — which two sectors each straddles
 
