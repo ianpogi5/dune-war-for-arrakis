@@ -123,27 +123,24 @@ shared by two edges, so an edge's count *includes* its corners. Unique areas = c
 > **Unique unnamed deep-desert areas = 20** (4 corners + 4 N + 2 W + 6 S + 4 E middles).
 > Check: edge sum 6+4+8+6 = 24, minus 4 corners counted twice = 20. ✅
 >
-> **Resolve this via §2 instead:** list every area in each of the 8 sectors. Any area you list
-> that isn't already named/placeholdered above = one of these unnamed desert areas. That gives
-> the exact full area set + sector assignment in one pass. We'll delete this draft table then.
+> These 20 unnamed areas + the named ones get assigned to sectors in §2 below.
 
 ---
 
 ## 2. Sectors (8 total: 4 central + 4 outer)
 
-Spokes radiate from the North Pole. I can see the blue boundary lines but did not fully
-assign every area. Please name the 8 sectors and list their member areas.
+Each **area belongs to exactly one sector**. For each sector you give: **# areas** + the
+**count per terrain type**. Direction labels are board-relative (see top note). We reconcile
+against the grand totals as we go, then assign the actual member areas.
 
-| id  | central/outer | areas in this sector                                                |
-| --- | ------------- | ------------------------------------------------------------------- |
-| s1  | central       | ? (the cities cluster is split across the northern central sectors) |
-| s2  | central       | ?                                                                   |
-| s3  | central       | ?                                                                   |
-| s4  | central       | ?                                                                   |
-| s5  | outer         | ?                                                                   |
-| s6  | outer         | ?                                                                   |
-| s7  | outer         | ?                                                                   |
-| s8  | outer         | ?                                                                   |
+**Grand totals to reconcile against:**
+plateau **8** · mountain **7** · minor_erg **5** · desert **30** (10 named + 20 unnamed deep) = **50 areas**
+
+| sector | central/outer | #areas | plateau | mountain | minor_erg | desert | member areas |
+|--------|---------------|--------|---------|----------|-----------|--------|--------------|
+| _(awaiting input — one row per sector)_ | | | | | | | |
+
+**Running tally:** plateau 0/8 · mountain 0/7 · minor_erg 0/5 · desert 0/30 · **areas 0/50**
 
 > Rules note: Coriolis storms spare "the 5 **central plateau** areas." With the corrected types
 > this is almost certainly the **5 city plateaus** (Arrakeen, Carthag, Arsunt, Hagga Basin,
