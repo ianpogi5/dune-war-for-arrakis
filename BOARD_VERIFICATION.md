@@ -416,16 +416,21 @@ s4_11:   s4_3 ✅, s4_10 ✅, s4_15 ✅, s4_16 ✅, s1_3 ✅(seam)              
 s4_12:   s4_6 ✅, bight_of_the_cliff ✅, the_great_flat ✅, s8_3 ✅, s3_2 ✅, s3_3 ✅
 s4_13:   s4_7 ✅, s4_8 ✅, s4_14 ✅, s8_1 ✅, s8_3 ✅, bight_of_the_cliff ✅   # air zone
 s4_14:   s4_8 ✅, s4_9 ✅, s4_13 ✅, s4_15 ✅, s8_1 ✅                       # air zone
-s4_15:   s4_9 ✅, s4_10 ✅, s4_11 ✅, s4_14 ✅, s4_16 ✅                     # + shield_wall (red → §4, confirm)
-s4_16:   s4_11 ✅, s4_15 ✅, s1_3 ✅(seam)                                  # + shield_wall, broken_land, arsunt (red → §4, confirm)
+s4_15:   s4_9 ✅, s4_10 ✅, s4_11 ✅, s4_14 ✅, shield_wall_2 ✅             # s4_15↔s4_16 is RED impassable (§4)!
+s4_16:   s4_11 ✅, s1_3 ✅(seam), broken_land ✅, arsunt ✅, shield_wall_2 ✅   # ⚠️ s4_16 is a MOUNTAIN area on the Shield Wall massif (city side of red line); NOT adj s4_15 (red §4)
 the_funeral_plain: s4_1 ✅, s4_2 ✅, s4_4 ✅, s4_5 ✅, s4_6 ✅, s4_7 ✅      # ringed by all 6
 rock_outcroppings: s4_2 ✅, s4_3 ✅, s4_4 ✅, s4_9 ✅, s4_10 ✅             # deep-desert sietch
 bight_of_the_cliff: s4_6 ✅, s4_7 ✅, s4_12 ✅, s4_13 ✅, s8_3 ✅           # non-deep desert sietch
 the_great_flat: s4_1 ✅, s4_5 ✅, s4_6 ✅, s4_12 ✅, s3_1 ✅, s3_2 ✅       # deep-desert (SW corner of s4)
 ```
 **s4 cross-sector edges to mirror:** →s1 (seam): s4_3↔s1_1 · s4_11↔s1_3 · s4_16↔s1_3.
-→s8: s4_13↔{s8_1, s8_3} · s4_14↔s8_1 · s4_12↔s8_3 · bight↔s8_3.  →s3: s4_12↔{s3_2,s3_3} · great_flat↔{s3_1,s3_2}.
-**s4 open:** only the §4 classification of s4_15/s4_16 ↔ Shield Wall / Broken Land / Arsunt (passable?).
+→s8: s4_13↔{s8_1, s8_3} · s4_14↔s8_1 · s4_12↔s8_3 · bight↔s8_3 · **s4_15↔shield_wall_2 · s4_16↔{shield_wall_2, arsunt}**.
+→s5: **s4_16↔broken_land**.  →s3: s4_12↔{s3_2,s3_3} · great_flat↔{s3_1,s3_2}.
+**🔴 s4 §4 finding (corrects earlier assumption):** the red impassable line runs **between s4_15 and s4_16**
+(along the Shield Wall crest), NOT between the desert and the mountains. s4_16 is a **mountain** area on the
+city side and is freely passable to Arsunt / Shield Wall #2 / Broken Land. So the north desert DOES connect
+to the cities via s4_16. Only s4_15↔s4_16 is sealed here. (Revisit full §4 extent when tracing s5/s8.)
+**s4 fully resolved.**
 
 ### 3b. Earlier photo-based DRAFT (UNVERIFIED — my geography proved unreliable; supersede with 3a)
 
@@ -477,11 +482,15 @@ windgap: false_wall_west, minor_erg_2          # Windgap, next to False Wall Wes
 ## 4. Impassable borders (red/white lines)
 
 ```
-shield_wall <-> (western desert area west of it)   # CONFIRMED red border (Bight of the Cliff side)
-broken_land  <-> (north desert)   # CONFIRMED: red border runs along the NORTH edge of the
-rimwall_west <-> (north desert)   #   Broken Land / Rimwall West arc — blocks city-mtns <-> north desert
-# The impassable line appears continuous along the N + W of the central mountain mass (Rimwall
-# West -> Broken Land -> Shield Wall). Confirm full extent; more red near False Wall East too.
+s4_15 <-> s4_16   # ✅ CONFIRMED (user): red line runs along the Shield Wall crest BETWEEN these two.
+                  #   s4_16 is a MOUNTAIN area on the city side; it IS passable to arsunt/shield_wall_2/
+                  #   broken_land. So the red arc is the s4_15|s4_16 seam here, NOT desert|mountain.
+broken_land  <-> s1_3 / (north desert)   # red arc continues along the N edge of Broken Land (seen by s1_3)
+rimwall_west <-> (north desert s1 side)  # red arc along Rimwall West's north (blocks s1 <-> city-mtns)
+# REVISED MODEL: the red impassable arc is NOT simply "all mountain edges." It threads specific
+# borders: s4_15|s4_16, and along the N face of Broken Land/Rimwall West facing the s1 desert.
+# s4_16/shield_wall/broken_land are mutually passable on the city side. Re-derive full extent with
+# the user while tracing s5/s8 (where Shield Wall #1 / Rimwall West / Broken Land live).
 ```
 
 ---
