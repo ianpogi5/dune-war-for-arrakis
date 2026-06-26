@@ -133,10 +133,11 @@ Each **area belongs to exactly one sector**. For each sector you give: **# areas
 **count per terrain type**. Direction labels are board-relative (see top note). We reconcile
 against the grand totals as we go, then assign the actual member areas.
 
-**Grand totals to reconcile against:**
-plateau **8** · mountain **7** · minor_erg **5** · deep-desert **23** (20 unnamed + Sihaya Ridge,
-Rock Outcroppings, Great Flat) · desert/non-deep **7** (Bight, Windgap, Habbanya Ridge, Gara
-Kulon, Hobars Gap, Tasmin Sink, Funeral Plain) = **50 areas**
+**Reliable pre-sector caps (confirmed by user):** minor_erg **5** (Harg Pass + 4) · deep-desert **23**
+(20 unnamed per-edge + Sihaya Ridge, Rock Outcroppings, Great Flat). Both ✅ matched by the sector counts.
+
+**NOT caps — only NAMED subsets** (sectors revealed many unnamed areas of these types too):
+plateau named 8 · mountain named 7 · non-deep desert named 7. Real totals come from the sectors below.
 
 | sector | c/o | #areas | plat | mtn | m.erg | deep des | desert |
 |--------|-----|--------|------|-----|-------|----------|--------|
@@ -147,11 +148,20 @@ Kulon, Hobars Gap, Tasmin Sink, Funeral Plain) = **50 areas**
 | **outer Σ** | | **58** | **3** | **4** | **0** | **22** | **29** |
 | SW-in | central | 8 | 2 | 0 | 0 | 0 | 6 |
 | SE-in | central | 9 | 1 | 1 | 3 | 1 | 3 |
+| NE-in | central | 16 | 4 | 9 | 2 | 0 | 1 |
 
 *(Inner-sector counts **EXCLUDE North Pole** — it's 1 mountain area shared by all 4 central
 sectors, counted once separately at the end. So board mountain total = inner mountains + outer 4 + North Pole.)*
 
-**Running tally (6 of 8):** plateau **6**/8 · mountain **5**/7 (+ North Pole pending) · minor_erg **3**/5 · deep-desert **23/23 ✅ RESOLVED** (22 outer + 1 SE-inner) · non-deep desert **38** · **areas 75** (+ North Pole)
+**Running tally (7 of 8):** plateau **10** (named=8 ❗exceeded) · mountain **14** (named=7 ❗exceeded) (+ North Pole) · minor_erg **5/5 ✅** · deep-desert **23/23 ✅** · non-deep desert **39** · **areas 91** (+ North Pole)
+
+> 🔴 **Major finding:** plateau (10) and mountain (14) have blown past the **named** counts (8, 7).
+> Just like the deserts, **plateau and mountain ALSO have many unnamed areas** — the grey mountain
+> arc and orange plateau are each subdivided into many areas; the named ones are only a subset.
+> So the only true pre-sector caps were **minor_erg = 5** and **deep-desert = 23** (both ✅ confirmed,
+> validating the user's explicit counts). The **board is much larger than 50** — sector counts are the
+> ground truth. After the last sector we'll know the real totals and how many unnamed plateau/mountain/
+> non-deep-desert areas to add to §1.
 
 > **Cross-check after all 4 outer sectors:**
 > - ✅ **Plateau 3 outer / 5 left for central** — and the 5 remaining must be the **5 city plateaus**
