@@ -206,8 +206,10 @@ reference; the real positional `s#_N` ids get assigned as we trace each sector. 
   (inner, by Rimwall West) · s1_8 on long mesa, left of Sihaya Ridge · s1_9 right-center by mesa ·
   s1_10 top-right(NE corner) · s1_11 bottom-center · s1_12 bottom-center-right · s1_13 right-lower ·
   s1_14 bottom-right(edge) · **Sihaya Ridge** right-center (named, green triangle).
-  ⏳ Not yet found in this tile: **s1_15, s1_16, Gara Kulon** (Gara Kulon "Cara Kulon" glimpsed at
-  bottom edge — may spill into center-east/center tile, or still to mark).
+  Found in **center-east.jpg** (s1 spills into it): s1_15 bottom-center (by Gara Kulon) · s1_16
+  bottom-right (by an air zone) · **Gara Kulon** (board spelling **"Cara Kulon"**) center, green
+  triangle, **adjacent to Shield Wall #1 (s5)** — visually confirms the s5 shield_wall↔gara_kulon edge.
+  ✅ **s1 fully located: s1_1..s1_16 + Sihaya Ridge + Gara Kulon = 18.**
 
 **Outer**
 - `s1` NE-out (18): **Sihaya Ridge** =`s1_dd1` + `s1_dd2..7` · **Gara Kulon** =`s1_nd1` + `s1_nd2..11`  ✅
