@@ -282,6 +282,7 @@ shield_wall_1 (s5_mtn4):  gara_kulon (s1_nd1), <a minor erg in s5 = s5_erg4 or s
 shield_wall_2 (s8_mtn2):  arsunt (s8_plt1), hagga_basin (s8_plt2)
 wind_pass     (s8_nd1):   north_pole (np), splintered_rock (s8_mtn1), s8_4, s8_2   # NOT false_wall_west
 s8_3:                     bight_of_the_cliff, s4_12, s4_13, s8_1, s8_4, s3_3, s7_1   # COMPLETE (7 nbrs); 4-sector junction
+north_pole    (np):       wind_pass (s8), s5_3, s6_1, s7_4   # ✅ COMPLETE — exactly one area per inner sector
 ```
 
 ### 3a-s1. Sector s1 (NE-outer) — PHOTO-TRACED DRAFT (from north-east.jpg + center-east.jpg)
@@ -449,7 +450,7 @@ s8_3:    bight_of_the_cliff ✅, s4_12 ✅, s4_13 ✅, s8_1 ✅, s8_4 ✅, s3_3 
 s8_4:    s8_3 ✅, s8_2 ✅, wind_pass ✅                 # NOT splintered_rock
 arsunt:        shield_wall_2 ✅, s4_16 ✅, hagga_basin ✅, carthag 🟡, broken_land 🟡   # city I (carthag/broken_land → confirm in s5)
 hagga_basin:   arsunt ✅, carthag ✅, s5_1 ✅, s5_2 ✅, splintered_rock ✅, s8_2 ✅, shield_wall_2 ✅   # city I; NOT north_pole / imperial_basin(air zone)
-splintered_rock: wind_pass ✅, s8_2 ✅, hagga_basin ✅, hole_in_the_rock 🟡, north_pole 🟡, false_wall_east 🟡, false_wall_west 🟡   # NOT s8_4
+splintered_rock: wind_pass ✅, s8_2 ✅, hagga_basin ✅, s5_2 🟡, false_wall_east 🟡, false_wall_west 🟡   # NOT s8_4, NOT north_pole, NOT hole_in_the_rock (per s5 rd2)
 shield_wall_2: arsunt ✅, hagga_basin ✅, s4_15 ✅, s4_16 ✅            # W side (s8_1, s4_13, s8_2?) = RED impassable §4
 wind_pass:     north_pole ✅, splintered_rock ✅, s8_4 ✅, s8_2 ✅      # NOT false_wall_west
 ```
@@ -470,27 +471,30 @@ between them). s5_1 = the central plateau ringed by all 3 cities + Hagga Basin. 
 bordering FIVE s1 areas** (s1_11/12/14/15/16) + Gara Kulon + Shield Wall #1 — this is the main s1↔s5 ground
 crossing. Mountain web (Rimwall West / Hole in the Rock / North Pole) still 🟡 — next round.
 ```
-s5_1:  carthag ✅, arrakeen ✅, imperial_basin ✅, hagga_basin ✅   # central PLATEAU amid the cities (s5_plt4)
-s5_2:  hagga_basin ✅, splintered_rock 🟡, hole_in_the_rock 🟡, north_pole 🟡, s5_3 🟡
-s5_3:  s5_2 🟡, s5_4 🟡, s5_5 🟡, hole_in_the_rock 🟡, north_pole 🟡
-s5_4:  imperial_basin ✅, s5_3 🟡, s5_7 🟡, north_pole 🟡, hole_in_the_rock 🟡
-s5_5:  imperial_basin ✅, s5_3 🟡, s5_6 🟡, s5_7 🟡, hole_in_the_rock 🟡, rimwall_west 🟡
-s5_6:  s5_5 🟡, s5_9 🟡, rimwall_west 🟡   # E = Rimwall West red arc (impassable, s1 side)
-s5_7:  s5_4 🟡, s5_5 🟡, s5_8 🟡, north_pole 🟡   # air zone
-s5_8:  s5_7 🟡, s5_9 🟡, s5_5 🟡
-s5_9:  gara_kulon ✅, shield_wall_1 ✅, s1_11 ✅, s1_12 ✅, s1_14 ✅, s1_15 ✅, s1_16 ✅, s5_8 🟡, s5_6 🟡
+s5_1:  carthag ✅, arrakeen ✅, imperial_basin ✅, hagga_basin ✅, hole_in_the_rock ✅   # central PLATEAU (s5_plt4)
+s5_2:  hagga_basin ✅, hole_in_the_rock ✅, s5_3 ✅, splintered_rock 🟡
+s5_3:  hole_in_the_rock ✅, north_pole ✅, s5_2 ✅, s5_4 ✅, s5_5 ✅   # the s5 area touching the pole
+s5_4:  imperial_basin ✅, hole_in_the_rock ✅, s5_3 ✅, s5_7 🟡
+s5_5:  imperial_basin ✅, rimwall_west ✅, s5_3 ✅, s5_6 ✅, s5_7 🟡
+s5_6:  s5_5 ✅, ??? 🟡   # NOT rimwall_west, NOT s5_9 — needs own list
+s5_7:  s5_8 ✅, s5_4 🟡, s5_5 🟡   # air zone (NOT north_pole)
+s5_8:  s5_7 ✅, s5_9 ✅, s5_5 🟡
+s5_9:  gara_kulon ✅, shield_wall_1 ✅, s1_11 ✅, s1_12 ✅, s1_14 ✅, s1_15 ✅, s1_16 ✅, s5_8 ✅   # NOT s5_6
 # Named hubs:
-carthag:        arsunt ✅, arrakeen ✅, hagga_basin ✅, broken_land ✅, s5_1 ✅   # NOT imperial_basin
-arrakeen:       carthag ✅, imperial_basin ✅, broken_land ✅, rimwall_west ✅, s5_1 ✅
-imperial_basin: arrakeen ✅, hole_in_the_rock ✅, rimwall_west ✅, s5_1 ✅, s5_4 ✅, s5_5 ✅   # NOT carthag, NOT hagga_basin (air zone)
-broken_land:    carthag ✅, arrakeen ✅, s4_16 ✅, arsunt 🟡, rimwall_west 🟡
-rimwall_west:   arrakeen ✅, imperial_basin ✅, broken_land 🟡, hole_in_the_rock 🟡, s5_5/s5_6 🟡, sihaya_ridge 🟡(s1)
-hole_in_the_rock: imperial_basin ✅, rimwall_west 🟡, north_pole 🟡, splintered_rock 🟡, false_wall_east 🟡, s5_2/3/4/5 🟡
+carthag:        arsunt ✅, arrakeen ✅, hagga_basin ✅, broken_land ✅, s5_1 ✅   # COMPLETE (NOT imperial_basin)
+arrakeen:       carthag ✅, imperial_basin ✅, broken_land ✅, rimwall_west ✅, s5_1 ✅   # COMPLETE
+imperial_basin: arrakeen ✅, hole_in_the_rock ✅, rimwall_west ✅, s5_1 ✅, s5_4 ✅, s5_5 ✅   # COMPLETE (NOT carthag/hagga_basin)
+hole_in_the_rock: imperial_basin ✅, s5_1 ✅, s5_2 ✅, s5_3 ✅, s5_4 ✅   # ✅ COMPLETE (embedded in s5)
+rimwall_west:   broken_land ✅, arrakeen ✅, imperial_basin ✅, s5_5 ✅, s1_4 ✅, s1_5 ✅   # ✅ COMPLETE; s1_4/s1_5 = RED impassable arc (§4)
+broken_land:    carthag ✅, arrakeen ✅, rimwall_west ✅, s4_16 ✅, arsunt 🟡
 shield_wall_1:  gara_kulon ✅, s5_9 ✅, <an s5 minor erg> ✅
 gara_kulon:     s1_11 ✅, s1_14 ✅, s1_15 ✅, shield_wall_1 ✅, s5_9 ✅
 ```
-**Open s5 (round 2):** s5_2/s5_3 + the mountain web — North Pole, Hole in the Rock, Rimwall West neighbour
-lists; s5_6↔s5_9, s5_7/s5_8 ties; which s5 area is each minor-erg/nd type; rimwall_west↔sihaya_ridge (s1).
+**🌟 North Pole COMPLETE (user):** `north_pole: wind_pass(s8), s5_3, s6_1, s7_4` — exactly ONE area per inner
+sector, nothing else. (Corrects earlier guesses: NOT splintered_rock / hole_in_the_rock / false walls / hagga_basin.)
+**Open s5 (round 3):** s5_6's neighbours (only s5_5 known) · s5_7↔s5_4/s5_5 · s5_8↔s5_5 · splintered_rock↔s5_2 ·
+which s5 areas are the 2 minor-ergs + 1 nd (s5_6/7/8?) · shield_wall_1's s5 minor-erg.
+**s5→inner reciprocals to mirror:** north_pole↔{s6_1, s7_4} · rimwall_west↔{s1_4, s1_5} (impassable §4).
 
 ### 3b. Earlier photo-based DRAFT (UNVERIFIED — my geography proved unreliable; supersede with 3a)
 
@@ -547,8 +551,8 @@ s8_1  <-> shield_wall_2 # ✅ CONFIRMED (user): red impassable = Shield Wall #2 
 s4_15 <-> s4_16   # ✅ CONFIRMED (user): red line runs along the Shield Wall crest BETWEEN these two.
                   #   s4_16 is a MOUNTAIN area on the city side; it IS passable to arsunt/shield_wall_2/
                   #   broken_land. So the red arc is the s4_15|s4_16 seam here, NOT desert|mountain.
-broken_land  <-> s1_3 / (north desert)   # red arc continues along the N edge of Broken Land (seen by s1_3)
-rimwall_west <-> (north desert s1 side)  # red arc along Rimwall West's north (blocks s1 <-> city-mtns)
+broken_land  <-> s1_3            # red arc along the N edge of Broken Land (⚠️ confirm passable vs red)
+rimwall_west <-> s1_4, s1_5      # user lists these as rimwall_west neighbours; treated as RED arc (⚠️ confirm)
 # REVISED MODEL: the red impassable arc is NOT simply "all mountain edges." It threads specific
 # borders: s4_15|s4_16, and along the N face of Broken Land/Rimwall West facing the s1 desert.
 # s4_16/shield_wall/broken_land are mutually passable on the city side. Re-derive full extent with
