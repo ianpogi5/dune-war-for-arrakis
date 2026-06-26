@@ -199,8 +199,8 @@ into their sector slot (see "named → slot" notes; some still TBD).
 **Outer**
 - `s1` NE-out (18): **Sihaya Ridge** =`s1_dd1` + `s1_dd2..7` · **Gara Kulon** =`s1_nd1` + `s1_nd2..11`  ✅
 - `s2` SE-out (10): **Pasty Mesa** =`s2_plt1` + `s2_plt2`(unnamed) · `s2_dd1..4` · **Tasmin Sink** =`s2_nd1` + `s2_nd2..4`  ✅ (False Wall South & Hobars Gap are NOT here — placed elsewhere, TBD)
-- `s3` SW-out (10): **False Wall West** (plt) · `s3_dd1..5` · `s3_nd1..4`  — named: The Great Flat (dd)
-- `s4` NW-out (20): `s4_mtn1..4` · `s4_dd1..6` · `s4_nd1..10`  — named likely: Rock Outcroppings (dd), The Funeral Plain (nd), Bight of the Cliff (nd)
+- `s3` SW-out (10): `s3_plt1`(unnamed) · `s3_dd1..5` · **Habbanya Ridge** =`s3_nd1` + `s3_nd2..4`  ✅ (False Wall West NOT here — inner)
+- `s4` NW-out (20): `s4_mtn1..4`(unnamed; Shield Wall NOT here) · **The Great Flat** =`s4_dd1`, **Rock Outcroppings** =`s4_dd2` + `s4_dd3..6` · **Bight of the Cliff** =`s4_nd1`, **The Funeral Plain** =`s4_nd2` + `s4_nd3..10`  ✅
 
 **Inner** (exclude North Pole)
 - `s5` NE-in (16): `s5_plt1..4` · `s5_mtn1..9` · `s5_erg4..5` · `s5_nd1`  — named mtn likely: Hole in the Rock, Splintered Rock, Rimwall West, Broken Land, False Wall East
@@ -209,12 +209,12 @@ into their sector slot (see "named → slot" notes; some still TBD).
 - `s8` NW-in (9): `s8_plt1..2` · `s8_mtn1..4` · `s8_nd1..3`  — named mtn likely: Shield Wall
 - `np` (1): **North Pole** (mtn; shared by all 4 inner sectors s5–s8)
 
-**Named areas to slot (26):** 5 city plateaus (Arrakeen, Carthag, Arsunt, Hagga Basin, Imperial
-Basin — inner, exact sector TBD) · False Wall West/South, Pasty Mesa (outer, placed) · 7 mountains
-(North Pole placed; Hole in the Rock, Shield Wall, Broken Land, Rimwall West, Splintered Rock,
-False Wall East — inner / s4, exact sector TBD) · Harg Pass (s6) · 8 sietches + Funeral Plain +
-Great Flat (placed above as best-guess). **The exact sector of each city + inner mountain still
-needs confirming** — that's the main open item for the roster.
+**Placement tracker (26 named):**
+- ✅ **Placed (10):** np North Pole · s1 Sihaya Ridge, Gara Kulon · s2 Pasty Mesa, Tasmin Sink ·
+  s3 Habbanya Ridge · s4 The Great Flat, Rock Outcroppings, Bight of the Cliff, The Funeral Plain.
+- ⏳ **Remaining 16 — all INNER (s5–s8):** plateaus Arrakeen, Carthag, Arsunt, Hagga Basin, Imperial
+  Basin, False Wall West, False Wall South · mountains Hole in the Rock, Shield Wall, Broken Land,
+  Rimwall West, Splintered Rock, False Wall East · minor erg Harg Pass · sietches Windgap, Hobars Gap.
 
 ---
 
