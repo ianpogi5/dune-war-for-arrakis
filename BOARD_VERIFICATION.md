@@ -197,7 +197,7 @@ Mechanically derived from the confirmed §2 sector/type counts. **ID = `<sector>
 into their sector slot (see "named → slot" notes; some still TBD).
 
 **Outer**
-- `s1` NE-out (18): `s1_dd1..7` · `s1_nd1..11`  — named: Sihaya Ridge (dd), Gara Kulon (nd)
+- `s1` NE-out (18): **Sihaya Ridge** =`s1_dd1` + `s1_dd2..7` · **Gara Kulon** =`s1_nd1` + `s1_nd2..11`  ✅
 - `s2` SE-out (10): **False Wall South**, **Pasty Mesa** (plt) · `s2_dd1..4` · `s2_nd1..4`  — named: Hobars Gap (nd, by FW South), Tasmin Sink (nd, by Pasty Mesa)
 - `s3` SW-out (10): **False Wall West** (plt) · `s3_dd1..5` · `s3_nd1..4`  — named: The Great Flat (dd)
 - `s4` NW-out (20): `s4_mtn1..4` · `s4_dd1..6` · `s4_nd1..10`  — named likely: Rock Outcroppings (dd), The Funeral Plain (nd), Bight of the Cliff (nd)
