@@ -5,6 +5,8 @@ import { applyHarkonnenAction, isAutoApplied } from '../engine/applyAction';
 import { availability } from '../engine/spiceMustFlow';
 import { startNextRound, SUPREMACY_WIN } from '../engine/round';
 import { placeVehicles } from '../engine/vehiclePlacement';
+import { resolveCardPlay, applyCardSteps } from '../engine/cardEffects';
+import { HOUSE_HARKONNEN_CARDS, CORRINO_ALLY_CARDS } from '../engine/planningCards';
 import { describeAction, actionHeadline, areaLabel } from './describeAction';
 import { sampleState } from './sampleState';
 import { StateEditor } from './StateEditor';
@@ -143,6 +145,69 @@ function ResolvePanel({ s, onApply }: { s: GameState; onApply: (next: GameState)
   );
 }
 
+// The 3 "Rage Overcame Shaddam IV" cards share a name; disambiguate them in the dropdown.
+const RAGE_SUFFIX: Record<string, string> = {
+  rage_overcame_shaddam_iv_a: ' — +4 Regulars',
+  rage_overcame_shaddam_iv_b: ' — +2 Sardaukar',
+  rage_overcame_shaddam_iv_c: ' — Surprise Attack',
+};
+const cardLabel = (c: { id: string; name: string }) => c.name + (RAGE_SUFFIX[c.id] ?? '');
+
+function CardPanel({ s, onApply }: { s: GameState; onApply: (next: GameState) => void }) {
+  const [cardId, setCardId] = useState('');
+  const resolution = useMemo(() => (cardId ? resolveCardPlay(cardId, s) : null), [cardId, s]);
+  const autoCount = resolution?.steps.filter((st) => st.auto).length ?? 0;
+
+  const apply = () => {
+    if (!resolution) return;
+    onApply(applyCardSteps(s, resolution.steps));
+    setCardId(''); // resolved — clear for the next card
+  };
+
+  return (
+    <section className="panel">
+      <h2>Play a planning card</h2>
+      <p className="hint">Pick the Harkonnen card to resolve; the app applies the mechanical steps and leaves the rest to you.</p>
+      <select className="card-select" value={cardId} onChange={(e) => setCardId(e.target.value)}>
+        <option value="">— pick a Harkonnen card —</option>
+        <optgroup label="House Harkonnen">
+          {HOUSE_HARKONNEN_CARDS.map((c) => (
+            <option key={c.id} value={c.id}>
+              {cardLabel(c)}
+            </option>
+          ))}
+        </optgroup>
+        <optgroup label="Corrino Ally">
+          {CORRINO_ALLY_CARDS.map((c) => (
+            <option key={c.id} value={c.id}>
+              {cardLabel(c)}
+            </option>
+          ))}
+        </optgroup>
+      </select>
+      {resolution && (
+        <>
+          <ol className="card-steps">
+            {resolution.steps.map((st, i) => (
+              <li key={i} className={st.auto ? 'auto' : 'manual'}>
+                <span className="step-badge">{st.auto ? 'auto' : 'you'}</span>
+                {st.text}
+              </li>
+            ))}
+          </ol>
+          {autoCount > 0 ? (
+            <button className="confirm-btn" onClick={apply}>
+              Apply {autoCount} auto step{autoCount === 1 ? '' : 's'}
+            </button>
+          ) : (
+            <p className="manual-note">All steps are resolved by you on the board.</p>
+          )}
+        </>
+      )}
+    </section>
+  );
+}
+
 export function App() {
   // Load the saved game on first render; fall back to the demo state.
   const [s, setS] = useState<GameState>(() => loadState() ?? sampleState());
@@ -177,6 +242,7 @@ export function App() {
       <main>
         <RoundPanel s={s} onChange={setS} />
         <ResolvePanel s={s} onApply={setS} />
+        <CardPanel s={s} onApply={setS} />
         <VehiclePanel s={s} />
         <StateEditor s={s} onChange={setS} onReset={reset} onExport={exportGame} onImport={setS} />
       </main>

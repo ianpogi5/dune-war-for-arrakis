@@ -109,10 +109,16 @@ Pure TS + tests, no UI. Model the round and the priority cascades from fan-summa
       Bashar: action slot, entry condition, special, combat-ability hits/shields — all captured),
       `imperiumBans.ts` (3 bans; CHOAM→stacking 5 wired into deploy/move), `planningCards.ts`
       (36-card catalog: 18 House Harkonnen + 18 Corrino). Effect *resolution* deferred.
+- [x] **Planning-card effect resolution** (`src/engine/cardEffects.ts`, 9 tests): every Harkonnen
+      card (18 House Harkonnen + 18 Corrino Ally) encoded as ordered play STEPS. Auto-applies the
+      deterministic ones (fixed-location unit placement, vehicle placement via the placement engine,
+      deck draws); moves/attacks/leader-entries/choices render as player directives. `resolveCardPlay`
+      + `applyCardSteps`; wired into the UI "Play a planning card" panel (auto/you badges). Shared
+      `areaLabel` moved to `engine/describeArea.ts`.
 - [ ] Tests against worked examples / rulebook edge cases
-- [ ] Remaining engine TODOs (need interaction model / a little data): planning-card +
-      named-leader-special effect resolution; round driver (state mutation + player confirmation —
-      overlaps Phase 3); coriolis storms (need the 5 storm-exempt central plateaus).
+- [ ] Remaining engine TODOs: named-leader-SPECIAL effect resolution (the red-action abilities;
+      data is in `leaders.ts`, resolution not yet encoded); coriolis storms (need the 5 storm-exempt
+      central plateaus).
 
 ### Phase 3 — React + TS UI
 - [x] Project scaffold (Vite 6 + React 18 + TS; `npm run dev`/`build`/`preview`). `src/ui/`

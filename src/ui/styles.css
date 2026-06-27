@@ -159,6 +159,53 @@ header h1 {
   color: #234;
 }
 
+.card-select {
+  width: 100%;
+  padding: 0.5rem 0.6rem;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fff;
+  font-size: 0.95rem;
+}
+
+.card-steps {
+  margin: 0.9rem 0 0.8rem;
+  padding-left: 1.2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.card-steps li {
+  font-size: 0.98rem;
+}
+
+.card-steps li.manual {
+  color: #5a4a32;
+}
+
+.step-badge {
+  display: inline-block;
+  margin-right: 0.5rem;
+  padding: 0.05rem 0.4rem;
+  border-radius: 999px;
+  font-size: 0.68rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  vertical-align: 0.08em;
+  color: #fff;
+}
+
+.card-steps li.auto .step-badge {
+  background: #2f5d50;
+}
+
+.card-steps li.manual .step-badge {
+  background: var(--sand);
+  color: var(--ink);
+}
+
 .win-banner {
   margin-bottom: 0.6rem;
   padding: 0.6rem 0.8rem;
