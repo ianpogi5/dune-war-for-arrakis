@@ -345,12 +345,12 @@ s2_4:    s2_2 ✅, s2_3 ✅, s2_7 ✅                          # E edge, lower
 s2_5:    s2_6 ✅, pasty_mesa ✅, tasmin_sink ✅, s2_8 ✅, false_wall_south ✅(s6), s6_3 ✅(s6)   # 6 nbrs; NOT s2_1; s2↔s6 ground crossing here
 s2_6:    s2_5 ✅, s2_7 ✅, s2_8 ✅, tasmin_sink ✅   # NOT s2_3
 s2_7:    s2_3 ✅, s2_4 ✅, s2_6 ✅, s2_8 ✅                  # S edge
-s2_8:    s2_6 ✅, s2_7 ✅, s2_5 ✅                           # SW air zone; S edge; NO s3 crossing
+s2_8:    s2_5 ✅, s2_6 ✅, s2_7 ✅, false_wall_south ✅(s6), hobars_gap ✅(s6), s6_5 ✅(s6)   # 6 nbrs; S edge; NO s3 crossing
 pasty_mesa:  s2_5 ✅, tasmin_sink ✅, s2_1 ✅, s1_15 ✅(s1)    # plateau; NO ground link into s6 (air zone)
 tasmin_sink: s2_1 ✅, s2_3 ✅, s2_5 ✅, s2_6 ✅, pasty_mesa ✅   # non-deep desert sietch
 ```
-**s2↔s6 mirrors to apply when tracing s6:** s2_5↔{false_wall_south, s6_3} (ground crossings).
-Pasty Mesa itself still air-zone-only into s6. (s2 area-by-area pass 2026-06-27.)
+**s2↔s6 mirrors to apply when tracing s6:** s2_5↔{false_wall_south, s6_3} · s2_8↔{false_wall_south,
+hobars_gap, s6_5} (ground crossings). Pasty Mesa itself still air-zone-only into s6. (s2 pass 2026-06-27.)
 
 ### 3a-s3. Sector s3 (SW-outer) — PHOTO-TRACED DRAFT (from south-west.jpg)
 ✅ = clear white border, 🟡 = likely. W edge (left) = Supremacy track; S edge = bottom; pole = upper-right.
