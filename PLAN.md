@@ -32,13 +32,13 @@ solo player (playing Atreides) doesn't have to execute the Harkonnen priority ru
 > §4 (impassable), §5 (air zones), plus §1/§2 (areas, types, sectors, settlements/sietches). Delete §3b
 > (old unreliable draft) when porting. A well-formedness test already passed via `scripts/gen_map.py`
 > (symmetric edges, no isolated nodes, every id resolves). See also `BOARD_GRAPH.md` for the visual map.
-Living file: `BOARD_VERIFICATION.md`. Extracted from physical-board photos in `docs/map/`.
+Living file: `BOARD_VERIFICATION.md`. Extracted from physical-board photos in `docs/images/`.
 - [x] Area names + types (colour rule: orange=plateau, grey=mountain, sand=desert, + minor_erg)
 - [x] Settlements (Arrakeen III, Carthag II, 4 Pyon villages I: Arsunt, Hagga Basin, Imperial Basin, North Pole)
 - [x] All 8 sietches named
 - [x] `deep` (deep-desert) flag per named desert (deep = Sihaya Ridge, Rock Outcroppings, The Great Flat)
 - [x] §2 Sectors (s1–s8 = 4 outer + 4 inner) — every area assigned; **board has 101 areas** (not ~50: plateau/mountain have many unnamed areas too)
-- [x] §2.1/§2.2 all 101 areas have ids + positions (user physically numbered the board `s#_N`; read off the marked `docs/map/*.jpg` tiles)
+- [x] §2.1/§2.2 all 101 areas have ids + positions (user physically numbered the board `s#_N`; read off the marked `docs/images/*.jpg` tiles)
 - [x] **§3 Adjacency — ✅ COMPLETE (2026-06-27).** All 8 sectors + North Pole (**101 areas**) traced and
       **user-verified area-by-area**: the user read each area's neighbour list and confirmed/corrected it; every
       list in `BOARD_VERIFICATION.md` §3a is ✅, cross-sector edges mirrored both ways, one commit per area.
@@ -136,5 +136,5 @@ Pure TS + tests, no UI. Model the round and the priority cascades from fan-summa
 - `BOARD_VERIFICATION.md` — board data (source of truth for Phase 1).
 - `board-extraction-notes.md` — how the board was read + raw findings.
 - `docs/` — rulebook (p37 = solo), FAQ, fan rules summary (p9 = Mahdi solo AI). *(gitignored: large)*
-- `docs/map/` — physical-board photos used for extraction. *(gitignored: large)*
+- `docs/images/` — physical-board photos used for extraction. *(gitignored: large)*
 - Memory index: see the project memory (`MEMORY.md`) — decisions, the colour rule, "always save to memory".

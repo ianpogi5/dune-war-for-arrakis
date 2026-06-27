@@ -1,6 +1,6 @@
 # Board verification checklist — please correct
 
-**v2** — re-extracted from your physical-board photos (`docs/map/`), far more reliable
+**v2** — re-extracted from your physical-board photos (`docs/images/`), far more reliable
 than the rulebook art. You correct it; then I generate the engine's `board.ts` from it.
 
 **Confidence key:** ✅ confident · 🟡 likely · ❓ guess — please verify

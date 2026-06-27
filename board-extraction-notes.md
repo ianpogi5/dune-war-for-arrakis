@@ -1,6 +1,6 @@
 # Board extraction notes (v2 — from physical board photos)
 
-Source: 8 high-res photos in `docs/map/` (8160×3768). Far clearer than the rulebook art.
+Source: 8 high-res photos in `docs/images/` (8160×3768). Far clearer than the rulebook art.
 Board = **two square sections joined at a central vertical seam**. Polar projection:
 **North Pole is the central hub** (steam/ice dot, center, slightly below middle). Sectors
 are pie-slices radiating from the pole. Supremacy track = west edge; Prescience track = east edge.
