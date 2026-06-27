@@ -306,7 +306,7 @@ s1_3:    s1_1 ✅, s1_4 ✅, s4_11 ✅, s4_3 ✅(seam)   # S border = Broken Lan
 s1_4:    s1_3 ✅, s1_2 ✅, s1_5 ✅, s1_1 ✅   # S border = Broken Land arc (impassable §4)
 s1_5:    s1_2 ✅, s1_4 ✅, s1_8 ✅, s1_7 ✅, s1_6 ✅   # SW=air zone; S→rimwall_west RED §4; + s5_5 RED §4
 s1_6:    s1_2 ✅, s1_8 ✅, s1_9 ✅, sihaya_ridge ✅, s1_5 ✅
-s1_7:    s1_5 ✅, s1_11 ✅, s1_8 ✅, s5_6 ✅   # W = air zone; s5_6 = white crossing; + s5_5 RED §4 (NOT rimwall_west)
+s1_7:    s1_5 ✅, s1_11 ✅, s1_8 ✅, s5_6 ✅, shield_wall_1 ✅   # white crossings; + s5_5 RED §4
 s1_8:    s1_5 ✅, s1_6 ✅, s1_9 ✅, s1_12 ✅, s1_11 ✅, s1_7 ✅
 s1_9:    s1_6 ✅, s1_8 ✅, sihaya_ridge ✅, s1_10 ✅, s1_12 ✅, s1_13 ✅
 s1_10:   sihaya_ridge ✅, s1_9 ✅, s1_13 ✅   # NE corner (desert_ne); E-edge (Prescience track)
@@ -487,7 +487,7 @@ imperial_basin: arrakeen ✅, hole_in_the_rock ✅, rimwall_west ✅, s5_1 ✅, 
 hole_in_the_rock: imperial_basin ✅, s5_1 ✅, s5_2 ✅, s5_3 ✅, s5_4 ✅   # ✅ COMPLETE (embedded in s5)
 rimwall_west:   broken_land ✅, arrakeen ✅, imperial_basin ✅, s5_5 ✅, s1_4 ✅, s1_5 ✅   # ✅ COMPLETE; s1_4/s1_5 = RED impassable arc (§4)
 broken_land:    carthag ✅, arrakeen ✅, rimwall_west ✅, s4_16 ✅, arsunt ✅   # ✅ COMPLETE: white(5) + s4_11, s1_3, s1_4 RED §4 = 8
-shield_wall_1:  gara_kulon ✅, s5_9 ✅, s5_8 ✅, s1_11 ✅, <an s5 minor erg> ✅   # + s5_6 = RED impassable (§4)
+shield_wall_1:  gara_kulon ✅, s5_9 ✅, s5_8 ✅, s1_11 ✅, s1_7 ✅   # ✅ COMPLETE; s5_8 = the s5 minor_erg; + s5_6 RED §4
 gara_kulon:     s1_11 ✅, s1_12 ✅, s1_14 ✅, s1_15 ✅, s1_16 ✅, shield_wall_1 ✅, s5_9 ✅
 ```
 **🌟 North Pole COMPLETE (user):** `north_pole: wind_pass(s8), s5_3, s6_1, s7_4` — exactly ONE area per inner
