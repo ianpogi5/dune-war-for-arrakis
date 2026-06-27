@@ -87,7 +87,10 @@ Pure TS + tests, no UI. Model the round and the priority cascades from fan-summa
       retreat), `applyHarkonnenHits` (solo casualty priority: shed extra leaders→downgrade
       elite/sardaukar→remove regulars, keep last leader, named→regen). TODO: dice-roll/hit
       tally (inject RNG; Hit/Shield/Special faces + leader Special abilities), full battle loop.
-- [ ] **Deployment** placement priority
+- [x] **Deployment** placement priority (`resolveDeployment` in harkonnenActions.ts, 4 tests):
+      3 units + 1 leader (priority named Beast Rabban/Feyd-Rautha → any named → Bashar); settlement
+      priority highest-CP legion → closest to target; unit substitution to next-higher tier;
+      stacking-limit (6) overflow. Added `HarkonnenReserve` to GameState.
 - [ ] Tests against worked examples / rulebook edge cases
 
 ### Phase 3 — React + TS UI

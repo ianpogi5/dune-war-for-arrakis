@@ -6,13 +6,15 @@
 // and its supporting state accessors. MENTAT/DEPLOYMENT/HOUSE and the full movement tie-breakers
 // build on these primitives in later passes.
 
-import type { GameState, Legion } from './state';
+import type { GameState, Legion, UnitType } from './state';
 import { combatPower } from './combatPower';
+import { unitCount } from './state';
 import {
   harkonnenAreAdjacent,
   withinAttackReach,
   canTroopTransport,
   harkonnenShortestPath,
+  harkonnenDistance,
   nearestByDistance,
 } from './movement';
 import { AREAS } from './board';
@@ -73,10 +75,18 @@ function sietchDefender(s: GameState, area: string): Legion {
 // Decision output
 // ---------------------------------------------------------------------------
 
+export interface DeployPlacement {
+  settlement: string;
+  units: Record<UnitType, number>;
+  /** Leader deployed here (named or 'Bashar'), if any. */
+  leader: string | null;
+}
+
 export type HarkonnenAction =
   | { kind: 'attack_sietch'; attacker: string; sietch: string; useOrnithopter: boolean }
   | { kind: 'attack_legion'; attacker: string; defender: string }
   | { kind: 'move'; legion: string; path: string[] }
+  | { kind: 'deploy'; placements: DeployPlacement[] }
   | { kind: 'none'; reason: string };
 
 // ---------------------------------------------------------------------------
@@ -209,6 +219,90 @@ export function selectMove(s: GameState): HarkonnenAction | null {
   const next = path[1] === target ? chosen.area : path[1];
   if (next === chosen.area) return null;
   return { kind: 'move', legion: chosen.area, path: [chosen.area, next] };
+}
+
+// ---------------------------------------------------------------------------
+// DEPLOYMENT action
+// ---------------------------------------------------------------------------
+
+/** A standard Harkonnen deployment places 3 units + 1 leader. */
+export const DEPLOY_UNITS = 3;
+/** Max units per area. */
+export const STACKING_LIMIT = 6;
+
+/** Named leaders that must be deployed before any other named leader. */
+const PRIORITY_NAMED = ['Beast Rabban', 'Feyd-Rautha'];
+
+/** Pick the leader to deploy: priority named first, then any named, then a Bashar, else null. */
+function chooseDeployLeader(s: GameState): string | null {
+  const named = s.harkonnenReserve.namedLeaders;
+  for (const p of PRIORITY_NAMED) if (named.includes(p)) return p;
+  if (named.length > 0) return named[0];
+  if (s.harkonnenReserve.bashars > 0) return 'Bashar';
+  return null;
+}
+
+/**
+ * Pick `count` units from the reserve, substituting a missing tier with the next-higher combat
+ * power (regular→elite→special_elite); nothing is lower than regular. Mutates a working copy.
+ */
+function pickUnits(reserve: Record<UnitType, number>, count: number): Record<UnitType, number> {
+  const out: Record<UnitType, number> = { regular: 0, elite: 0, special_elite: 0 };
+  const order: UnitType[] = ['regular', 'elite', 'special_elite'];
+  let need = count;
+  for (const t of order) {
+    if (need <= 0) break;
+    const take = Math.min(need, reserve[t]);
+    out[t] += take;
+    reserve[t] -= take;
+    need -= take;
+  }
+  return out;
+}
+
+/**
+ * Resolve a DEPLOYMENT action: deploy 3 units + 1 leader into Harkonnen settlement(s), choosing
+ * by priority — the settlement whose legion has the highest combat power, then the settlement
+ * closest to the target sietch. Units overflow into the next settlement when the stacking limit
+ * (6 units/area) is reached. Returns a `none` action if there is nothing to deploy.
+ */
+export function resolveDeployment(s: GameState): HarkonnenAction {
+  const reserve = { ...s.harkonnenReserve.units };
+  const leader = chooseDeployLeader(s);
+  const totalAvail = reserve.regular + reserve.elite + reserve.special_elite;
+  if (totalAvail === 0 && !leader) return { kind: 'none', reason: 'nothing to deploy' };
+
+  // Ordered settlements: highest-CP legion first, then closest to the target sietch.
+  const settlements = s.settlements
+    .filter((st) => !st.destroyed)
+    .map((st) => {
+      const leg = legionAt(s, st.area, 'harkonnen');
+      const dist = s.targetSietchId ? harkonnenDistance(st.area, s.targetSietchId) : Infinity;
+      return { area: st.area, cp: leg ? combatPower(leg) : 0, dist, used: leg ? unitCount(leg) : 0 };
+    })
+    .sort((a, b) => (b.cp !== a.cp ? b.cp - a.cp : a.dist - b.dist));
+
+  if (settlements.length === 0) return { kind: 'none', reason: 'no settlements to deploy into' };
+
+  const placements: DeployPlacement[] = [];
+  let toPlace = Math.min(DEPLOY_UNITS, totalAvail);
+  let leaderPlaced = false;
+
+  for (const st of settlements) {
+    if (toPlace <= 0 && (leaderPlaced || !leader)) break;
+    const capacity = STACKING_LIMIT - st.used;
+    if (capacity <= 0) continue;
+    const units = pickUnits(reserve, Math.min(toPlace, capacity));
+    const n = units.regular + units.elite + units.special_elite;
+    const placeLeaderHere = !leaderPlaced && leader !== null && (n > 0 || placements.length === 0);
+    if (n === 0 && !placeLeaderHere) continue;
+    placements.push({ settlement: st.area, units, leader: placeLeaderHere ? leader : null });
+    toPlace -= n;
+    if (placeLeaderHere) leaderPlaced = true;
+  }
+
+  if (placements.length === 0) return { kind: 'none', reason: 'no capacity to deploy' };
+  return { kind: 'deploy', placements };
 }
 
 // ---------------------------------------------------------------------------

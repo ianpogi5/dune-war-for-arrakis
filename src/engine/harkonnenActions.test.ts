@@ -4,6 +4,7 @@ import {
   selectSietchAttack,
   selectLegionAttack,
   selectMove,
+  resolveDeployment,
 } from './harkonnenActions';
 import { emptyLegion, type GameState, type Legion, type SietchState } from './state';
 import { harkonnenAreAdjacent } from './movement';
@@ -32,6 +33,7 @@ function state(over: Partial<GameState> = {}): GameState {
       wormsignPool: 16,
       tacticalDeck: 8,
     },
+    harkonnenReserve: { units: { regular: 16, elite: 8, special_elite: 8 }, deploymentTokens: 12, bashars: 2, namedLeaders: [] },
     beneGesserit: { atreides: 1, reserve: 4 },
     harkonnenUnusedDice: 0,
     atreidesUnusedDice: 0,
@@ -128,6 +130,71 @@ describe('selectMove', () => {
 
   it('returns null without a target sietch', () => {
     expect(selectMove(state({ legions: [hLegion('carthag')] }))).toBeNull();
+  });
+});
+
+describe('resolveDeployment', () => {
+  it('deploys 3 units + a leader into the highest-CP settlement', () => {
+    const s = state({
+      settlements: [
+        { area: 'carthag', rank: 2, destroyed: false },
+        { area: 'arrakeen', rank: 3, destroyed: false },
+      ],
+      legions: [hLegion('carthag', { regular: 1 }), hLegion('arrakeen', { regular: 2 })], // arrakeen stronger, has room
+      harkonnenReserve: { units: { regular: 16, elite: 8, special_elite: 8 }, deploymentTokens: 12, bashars: 2, namedLeaders: ['Feyd-Rautha'] },
+    });
+    const a = resolveDeployment(s);
+    expect(a.kind).toBe('deploy');
+    if (a.kind !== 'deploy') return;
+    expect(a.placements[0].settlement).toBe('arrakeen');
+    const p = a.placements[0];
+    expect(p.units.regular + p.units.elite + p.units.special_elite).toBe(3);
+    expect(p.leader).toBe('Feyd-Rautha'); // priority named leader
+  });
+
+  it('substitutes higher-tier units when regulars run out', () => {
+    const s = state({
+      settlements: [{ area: 'carthag', rank: 2, destroyed: false }],
+      harkonnenReserve: { units: { regular: 1, elite: 5, special_elite: 0 }, deploymentTokens: 0, bashars: 1, namedLeaders: [] },
+    });
+    const a = resolveDeployment(s);
+    if (a.kind !== 'deploy') throw new Error('expected deploy');
+    const u = a.placements[0].units;
+    expect(u.regular).toBe(1);
+    expect(u.elite).toBe(2); // 2 missing regulars substituted by elites
+    expect(a.placements[0].leader).toBe('Bashar'); // no named -> Bashar
+  });
+
+  it('overflows into the next settlement at the stacking limit', () => {
+    const s = state({
+      settlements: [
+        { area: 'carthag', rank: 2, destroyed: false },
+        { area: 'arrakeen', rank: 3, destroyed: false },
+      ],
+      // carthag is the strongest (primary) but nearly full (5 units -> only 1 fits); arrakeen has room.
+      legions: [hLegion('carthag', { regular: 5 }), hLegion('arrakeen', { regular: 1 })],
+      harkonnenReserve: { units: { regular: 16, elite: 0, special_elite: 0 }, deploymentTokens: 0, bashars: 1, namedLeaders: [] },
+    });
+    const a = resolveDeployment(s);
+    if (a.kind !== 'deploy') throw new Error('expected deploy');
+    const total = a.placements.reduce(
+      (n, p) => n + p.units.regular + p.units.elite + p.units.special_elite,
+      0,
+    );
+    expect(total).toBe(3);
+    expect(a.placements.length).toBeGreaterThanOrEqual(2); // spilled across settlements
+    for (const p of a.placements) {
+      const used = p.settlement === 'carthag' ? 5 : 1;
+      expect(p.units.regular + used).toBeLessThanOrEqual(6);
+    }
+  });
+
+  it('returns none with nothing to deploy', () => {
+    const s = state({
+      settlements: [{ area: 'carthag', rank: 2, destroyed: false }],
+      harkonnenReserve: { units: { regular: 0, elite: 0, special_elite: 0 }, deploymentTokens: 0, bashars: 0, namedLeaders: [] },
+    });
+    expect(resolveDeployment(s)).toEqual({ kind: 'none', reason: 'nothing to deploy' });
   });
 });
 

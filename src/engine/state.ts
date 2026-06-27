@@ -205,6 +205,20 @@ export type RoundPhase =
   | 'end'; // advance supremacy, reshuffle tactical deck
 
 // ---------------------------------------------------------------------------
+// Reserve pools (pieces off the board, available to deploy)
+// ---------------------------------------------------------------------------
+
+export interface HarkonnenReserve {
+  units: Record<UnitType, number>;
+  /** Facedown deployment tokens available (black+silver pool). */
+  deploymentTokens: number;
+  /** Generic Bashar leaders available. */
+  bashars: number;
+  /** Named leaders available to deploy (by name). Beast Rabban / Feyd-Rautha deploy first. */
+  namedLeaders: string[];
+}
+
+// ---------------------------------------------------------------------------
 // Aggregate game state
 // ---------------------------------------------------------------------------
 
@@ -232,6 +246,9 @@ export interface GameState {
   spice: SpiceMustFlow;
   tracks: Tracks;
   decks: Decks;
+
+  /** Harkonnen pieces off the board, available to deploy. */
+  harkonnenReserve: HarkonnenReserve;
 
   /** Bene Gesserit tokens: held by Atreides + the shared reserve (5 total at start). */
   beneGesserit: { atreides: number; reserve: number };
