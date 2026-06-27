@@ -8,6 +8,7 @@ import { placeVehicles } from '../engine/vehiclePlacement';
 import { resolveCardPlay } from '../engine/cardEffects';
 import { resolveLeaderSpecial } from '../engine/leaderEffects';
 import { applyEffectSteps } from '../engine/effectSteps';
+import { stormTargets, stormHits, resolveCoriolisStorms, type StormDice } from '../engine/storms';
 import { HOUSE_HARKONNEN_CARDS, CORRINO_ALLY_CARDS } from '../engine/planningCards';
 import { NAMED_LEADERS } from '../engine/leaders';
 import { describeAction, actionHeadline, areaLabel } from './describeAction';
@@ -225,6 +226,73 @@ function CardPanel({ s, onApply }: { s: GameState; onApply: (next: GameState) =>
 
 const UNDO_LIMIT = 20;
 
+function StormPanel({ s, onApply }: { s: GameState; onApply: (next: GameState) => void }) {
+  const targets = useMemo(() => stormTargets(s), [s]);
+  const [dice, setDice] = useState<Record<number, StormDice>>({});
+  const get = (i: number) => dice[i] ?? { swords: 0, specials: 0 };
+  const set = (i: number, patch: Partial<StormDice>) =>
+    setDice((d) => ({ ...d, [i]: { ...get(i), ...patch } }));
+
+  const apply = () => {
+    const { state } = resolveCoriolisStorms(s, (t) => get(t.legionIndex));
+    onApply(state);
+    setDice({});
+  };
+
+  return (
+    <section className="panel">
+      <h2>Coriolis Storms</h2>
+      {targets.length === 0 ? (
+        <p className="hint">No Harkonnen legions are exposed to storms this phase.</p>
+      ) : (
+        <>
+          <p className="hint">Roll 2 Combat dice per exposed legion and enter the results (swords + specials, max 2 total). Each sword = 1 hit; each special = the terrain value shown.</p>
+          {targets.map((t) => {
+            const d = get(t.legionIndex);
+            const hits = stormHits(t.area, d);
+            return (
+              <div key={t.legionIndex} className="storm-row">
+                <div className="storm-area">
+                  <strong>{t.areaLabel}</strong>
+                  <span className="hint">
+                    {t.deep ? 'deep desert' : t.terrain} · special = {t.specialHitValue} hit{t.specialHitValue === 1 ? '' : 's'}
+                  </span>
+                </div>
+                <label className="mini">
+                  Swords
+                  <input
+                    type="number"
+                    min={0}
+                    max={2}
+                    value={d.swords}
+                    onChange={(e) => set(t.legionIndex, { swords: Math.max(0, Math.min(2, Number(e.target.value))) })}
+                  />
+                </label>
+                <label className="mini">
+                  Specials
+                  <input
+                    type="number"
+                    min={0}
+                    max={2}
+                    value={d.specials}
+                    onChange={(e) => set(t.legionIndex, { specials: Math.max(0, Math.min(2, Number(e.target.value))) })}
+                  />
+                </label>
+                <span className={`storm-hits ${hits > 0 ? 'hot' : ''}`}>
+                  {hits} hit{hits === 1 ? '' : 's'}
+                </span>
+              </div>
+            );
+          })}
+          <button className="confirm-btn" onClick={apply}>
+            Apply storm casualties
+          </button>
+        </>
+      )}
+    </section>
+  );
+}
+
 export function App() {
   // Load the saved game on first render; fall back to the demo state.
   const [s, setS] = useState<GameState>(() => loadState() ?? sampleState());
@@ -287,6 +355,7 @@ export function App() {
         <RoundPanel s={s} onChange={commit} />
         <ResolvePanel s={s} onApply={commit} />
         <CardPanel s={s} onApply={commit} />
+        <StormPanel s={s} onApply={commit} />
         <VehiclePanel s={s} />
         <StateEditor s={s} onChange={setS} onReset={reset} onExport={exportGame} onImport={loadGame} />
       </main>

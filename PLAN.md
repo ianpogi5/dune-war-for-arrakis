@@ -120,8 +120,13 @@ Pure TS + tests, no UI. Model the round and the priority cascades from fan-summa
       `effectSteps.ts` machinery; auto-draws apply (Thufir 3, Gaius 2), moves/attacks/deploys/
       replacements stay player-resolved. `resolveLeaderSpecial`. The card + leader step builders were
       extracted to `effectSteps.ts` (shared by `cardEffects.ts` and `leaderEffects.ts`).
+- [x] **Coriolis Storms** (`src/engine/storms.ts`, 11 tests): the 5 storm-exempt central plateaus
+      are DERIVED from the board graph (plateaus encircled only by mountains/plateau = Arrakeen,
+      Carthag, Imperial Basin, Hagga Basin, Arsunt — no board re-read needed). `isStormVulnerable`,
+      per-special terrain hits (deep 2 / desert 1 / erg+plateau 0), `resolveCoriolisStorms` applies
+      the standard Harkonnen casualty priority. UI: a "Coriolis Storms" Desert-Hazards panel where
+      the player enters each exposed legion's 2-die result and the app applies the casualties.
 - [ ] Tests against worked examples / rulebook edge cases
-- [ ] Remaining engine TODOs: coriolis storms (need the 5 storm-exempt central plateaus).
 
 ### Phase 3 — React + TS UI
 - [x] Project scaffold (Vite 6 + React 18 + TS; `npm run dev`/`build`/`preview`). `src/ui/`

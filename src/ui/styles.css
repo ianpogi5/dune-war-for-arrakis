@@ -234,6 +234,57 @@ header h1 {
   color: var(--ink);
 }
 
+.storm-row {
+  display: flex;
+  align-items: flex-end;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  padding: 0.5rem 0.6rem;
+  margin-bottom: 0.5rem;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fff;
+}
+
+.storm-area {
+  display: flex;
+  flex-direction: column;
+  margin-right: auto;
+}
+
+.storm-area .hint {
+  margin: 0;
+  font-size: 0.8rem;
+}
+
+.storm-row label.mini {
+  display: flex;
+  flex-direction: column;
+  font-size: 0.78rem;
+  color: #6a583c;
+  gap: 0.15rem;
+}
+
+.storm-row label.mini input {
+  width: 3rem;
+  padding: 0.3rem 0.4rem;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  font-size: 0.9rem;
+}
+
+.storm-hits {
+  align-self: center;
+  font-weight: 800;
+  min-width: 3.4rem;
+  text-align: right;
+  color: #6a583c;
+}
+
+.storm-hits.hot {
+  color: var(--accent);
+}
+
 .win-banner {
   margin-bottom: 0.6rem;
   padding: 0.6rem 0.8rem;
