@@ -1,0 +1,19 @@
+{
+  "name": "dune-war-for-arrakis",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "description": "Solo companion for Dune: War for Arrakis — headless Mahdi Harkonnen AI engine (Phase 1: board data).",
+  "scripts": {
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "tsc --noEmit",
+    "gen:board": "python3 scripts/gen_board.py > src/engine/board.ts",
+    "gen:map": "python3 scripts/gen_map.py | neato -Tpng -Gdpi=150 -o board_map.png && python3 scripts/gen_map.py | neato -Tsvg -o board_map.svg"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "typescript": "^5.7.2",
+    "vitest": "^2.1.8"
+  }
+}

@@ -48,11 +48,16 @@ Living file: `BOARD_VERIFICATION.md`. Extracted from physical-board photos in `d
 - [x] §4 Impassable borders — **DONE & user-verified exhaustive (2026-06-27): 11 red pairs** in `BOARD_VERIFICATION.md` §4 (one continuous arc on the N+W face of the central mass).
 - [x] §5 Air zones — **DONE & user-confirmed (2026-06-27): 8 zones** in `BOARD_VERIFICATION.md` §5 (4 inner-ring links + 4 outer→inner spokes; each connects a specific 2–3 areas, not whole sectors/pole).
 
-### Phase 1 — `board.ts`
-- [ ] Generate typed board module from the verified `BOARD_VERIFICATION.md`
-      (areas, types, adjacency graph, sectors, air zones, impassable, settlement/sietch slots)
-- [ ] Adjacency/air/impassable helpers + a unit test asserting the graph is well-formed
-      (symmetric edges, every id resolves, no dangling refs)
+### Phase 1 — `board.ts`  *(✅ DONE 2026-06-27)*
+- [x] Generated typed board module `src/engine/board.ts` from `BOARD_VERIFICATION.md` via
+      `scripts/gen_board.py` (`npm run gen:board`): 101 `AREAS` (id/name/sector/terrain/deep/
+      settlement/sietch), symmetric `ADJACENCY` (265 edges), `IMPASSABLE` (11), `AIR_ZONES` (8).
+      ⚠️ **Gap:** `terrain`/`deep` are `null` for most UNNAMED areas (never individually typed —
+      only sector-level counts known). Graph is complete; terrain typing is a later focused pass.
+- [x] Helpers in `src/engine/graph.ts` (neighbors / areAdjacent / isImpassable / airZonesOf /
+      shortestGroundPath) + Vitest suite `board.test.ts` — **14 tests pass**: 101 areas, symmetric &
+      connected graph, no isolated nodes, impassable disjoint from passable, air zones valid.
+      Toolchain: Node 22, TypeScript (strict, `tsc --noEmit` clean), Vitest. (Vite+React deferred to Phase 3.)
 
 ### Phase 2 — Headless Harkonnen AI engine  *(the core value)*
 Pure TS + tests, no UI. Model the round and the priority cascades from fan-summary p9:
