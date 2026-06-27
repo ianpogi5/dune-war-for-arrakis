@@ -673,4 +673,8 @@ DEEP s3: s3_1, s3_4, s3_6, s3_7, s3_9
 TERRAIN s7: plateau = s7_2, false_wall_west
 TERRAIN s7: desert = s7_1, s7_3, s7_4, s7_5, s7_6, windgap
 DEEP s7: (none)
+
+TERRAIN s4: mountain = s4_13, s4_14, s4_15, s4_16
+TERRAIN s4: desert = s4_1, s4_2, s4_3, s4_4, s4_5, s4_6, s4_7, s4_8, s4_9, s4_10, s4_11, s4_12, the_funeral_plain, rock_outcroppings, bight_of_the_cliff, the_great_flat
+DEEP s4: s4_1, s4_2, s4_3, s4_5, rock_outcroppings, the_great_flat
 ```
