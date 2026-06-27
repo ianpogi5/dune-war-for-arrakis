@@ -403,7 +403,7 @@ NOT adjacent: s4_2↔s4_3, s4_4↔s4_9. Seam: s4_3↔s1_1, s4_11↔s1_3, s4_16�
 ⚠️ User also listed s4_15↔shield_wall and s4_16↔{shield_wall, broken_land, arsunt} — these are the
 RED mountain edges → treated as **impassable (§4)** pending the confirm Q below.
 ```
-s4_1:    s4_2 ✅, s4_5 ✅, the_funeral_plain ✅, the_great_flat ✅           # W edge
+s4_1:    s4_2 ✅, s4_5 ✅, the_funeral_plain ✅           # W edge; NOT the_great_flat
 s4_2:    s4_1 ✅, s4_4 ✅, the_funeral_plain ✅, rock_outcroppings ✅        # N edge (NOT s4_3)
 s4_3:    s4_10 ✅, s4_11 ✅, rock_outcroppings ✅, s1_1 ✅, s1_3 ✅(seam)     # N edge (NOT s4_2)
 s4_4:    s4_2 ✅, s4_7 ✅, s4_8 ✅, the_funeral_plain ✅, rock_outcroppings ✅   # (NOT s4_9)
@@ -422,7 +422,7 @@ s4_16:   s4_11 ✅, broken_land ✅, arsunt ✅, shield_wall_2 ✅   # MOUNTAIN 
 the_funeral_plain: s4_1 ✅, s4_2 ✅, s4_4 ✅, s4_5 ✅, s4_6 ✅, s4_7 ✅      # ringed by all 6
 rock_outcroppings: s4_2 ✅, s4_3 ✅, s4_4 ✅, s4_9 ✅, s4_10 ✅             # deep-desert sietch
 bight_of_the_cliff: s4_6 ✅, s4_7 ✅, s4_12 ✅, s4_13 ✅, s8_3 ✅           # non-deep desert sietch
-the_great_flat: s4_1 ✅, s4_5 ✅, s4_6 ✅, s4_12 ✅, s3_1 ✅, s3_2 ✅       # deep-desert (SW corner of s4)
+the_great_flat: s4_5 ✅, s4_6 ✅, s4_12 ✅, s3_1 ✅, s3_2 ✅       # deep-desert (SW corner of s4); NOT s4_1
 ```
 **s4 cross-sector edges to mirror:** →s1 (seam): s4_3↔{s1_1, s1_3} · s4_11↔s1_3 (s4_16 does NOT reach s1).
 →s8: s4_13↔{s8_1, s8_3} · s4_14↔s8_1 · s4_12↔s8_3 · bight↔s8_3 · **s4_15↔shield_wall_2 · s4_16↔{shield_wall_2, arsunt}**.
