@@ -655,4 +655,8 @@ also link zone-to-zone (an ornithopter flight network) is a movement-rule detail
 ```
 TERRAIN s1: desert = ALL
 DEEP s1: s1_1, s1_2, s1_10, s1_13, s1_14, s1_16, sihaya_ridge
+
+TERRAIN s2: plateau = s2_5, pasty_mesa
+TERRAIN s2: desert = s2_1, s2_2, s2_3, s2_4, s2_6, s2_7, s2_8, tasmin_sink
+DEEP s2: s2_2, s2_4, s2_7, s2_8
 ```
