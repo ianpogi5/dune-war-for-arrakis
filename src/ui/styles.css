@@ -285,6 +285,18 @@ header h1 {
   color: var(--accent);
 }
 
+.crash-detail {
+  margin: 0.6rem 0;
+  padding: 0.6rem 0.7rem;
+  background: #fbeae7;
+  border-left: 4px solid var(--accent);
+  border-radius: 6px;
+  font-size: 0.85rem;
+  color: #5a1a12;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
 .win-banner {
   margin-bottom: 0.6rem;
   padding: 0.6rem 0.8rem;

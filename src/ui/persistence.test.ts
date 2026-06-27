@@ -49,6 +49,19 @@ describe('persistence', () => {
     expect(loadState(st)).toBeNull();
   });
 
+  it('rejects a stale/partial save missing newer fields (would otherwise crash the UI)', () => {
+    const st = fakeStorage();
+    const partial = { ...sampleState() } as Record<string, unknown>;
+    delete partial.harkonnenReserve; // an older save predating the reserve
+    st.setItem(STORAGE_KEY, JSON.stringify(partial));
+    expect(loadState(st)).toBeNull();
+
+    const noTracks = { ...sampleState() } as Record<string, unknown>;
+    delete noTracks.tracks;
+    st.setItem(STORAGE_KEY, JSON.stringify(noTracks));
+    expect(loadState(st)).toBeNull();
+  });
+
   it('clears saved state', () => {
     const st = fakeStorage();
     saveState(sampleState(), st);

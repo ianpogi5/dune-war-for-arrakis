@@ -14,16 +14,34 @@ function safeStorage(): Storage | undefined {
   }
 }
 
-/** Minimal structural check so a stale/foreign value doesn't crash the app. */
+const isObj = (x: unknown): x is Record<string, unknown> => typeof x === 'object' && x !== null;
+
+/**
+ * Structural check so a stale/foreign/partial value can't crash the app on render. Requires every
+ * field the UI dereferences — an older save missing newer fields (e.g. `harkonnenReserve`) is
+ * rejected here and the app falls back to a fresh sample state instead of blanking the screen.
+ */
 function looksLikeState(x: unknown): x is GameState {
-  if (!x || typeof x !== 'object') return false;
+  if (!isObj(x)) return false;
   const s = x as Record<string, unknown>;
   return (
     typeof s.round === 'number' &&
     Array.isArray(s.legions) &&
-    typeof s.spice === 'object' &&
-    s.spice !== null &&
-    'markers' in (s.spice as object)
+    Array.isArray(s.settlements) &&
+    Array.isArray(s.sietches) &&
+    Array.isArray(s.vehicles) &&
+    Array.isArray(s.wormsigns) &&
+    Array.isArray(s.sandworms) &&
+    isObj(s.spice) &&
+    isObj((s.spice as Record<string, unknown>).markers) &&
+    Array.isArray((s.spice as Record<string, unknown>).activeBans) &&
+    isObj(s.tracks) &&
+    typeof (s.tracks as Record<string, unknown>).supremacy === 'number' &&
+    isObj(s.decks) &&
+    isObj((s.decks as Record<string, unknown>).planning) &&
+    isObj(s.harkonnenReserve) &&
+    isObj((s.harkonnenReserve as Record<string, unknown>).units) &&
+    isObj(s.beneGesserit)
   );
 }
 
