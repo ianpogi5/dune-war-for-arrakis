@@ -117,9 +117,10 @@ Pure TS + tests, no UI. Model the round and the priority cascades from fan-summa
 ### Phase 3 — React + TS UI
 - [x] Project scaffold (Vite 6 + React 18 + TS; `npm run dev`/`build`/`preview`). `src/ui/`
       decoupled from the pure `src/engine/`. Build + dev server verified; 136 tests pass.
-- [~] "Resolve Harkonnen turn" flow: `App.tsx` — this-round panel (dice/vehicles/bans from SMF),
-      tap a die result → `resolveAction` → `describeAction` plain-English directive (tested);
-      vehicle-placement panel. Runs on a demo `sampleState`. TODO: confirm/advance turns.
+- [x] "Resolve Harkonnen turn" flow: `App.tsx` — this-round panel (dice/vehicles/bans from SMF),
+      tap a die result → `resolveAction` → `describeAction` directive, then "Confirm & apply"
+      mutates state via `applyHarkonnenAction` (`src/engine/applyAction.ts`, 8 tests: move/deploy/
+      house/vehicles; attacks+mentat stay player-resolved). vehicle-placement panel. State persists.
 - [~] Board-state editor (`src/ui/StateEditor.tsx`): state lifted into App; edit imperium markers
       (auto-derives bans), harvesting sector, target sietch, and add/edit/remove legions (area, unit
       counts, generic/named leaders). Resolver + panels react live. TODO: sietch/settlement
