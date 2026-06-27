@@ -314,7 +314,7 @@ s1_11:   s1_7 ✅, s1_8 ✅, s1_12 ✅, gara_kulon ✅, shield_wall_1 ✅   # NO
 s1_12:   s1_8 ✅, s1_9 ✅, s1_11 ✅, s1_13 ✅, s1_14 ✅, gara_kulon ✅   # NOT s5_9
 s1_13:   s1_9 ✅, s1_10 ✅, s1_12 ✅, s1_14 ✅   # E-edge
 s1_14:   s1_12 ✅, s1_13 ✅, s1_16 ✅, gara_kulon ✅   # E-edge; exactly 4 nbrs (NOT s5_9, NOT s1_15)
-sihaya_ridge: s1_2 ✅, s1_6 ✅, s1_9 ✅, s1_10 ✅   # deep-desert sietch (+ rimwall_west? — s5 rd2)
+sihaya_ridge: s1_2 ✅, s1_6 ✅, s1_9 ✅, s1_10 ✅   # ✅ VERIFIED deep-desert sietch (4 nbrs; NOT rimwall_west)
 gara_kulon:   s1_11 ✅, s1_14 ✅, s1_15 ✅, shield_wall_1/s5_mtn4 ✅(§3a), s5_9 ✅
 s1_15:   gara_kulon ✅, s1_16 ✅, s5_9 ✅, pasty_mesa ✅(s2), s2_1 ✅   # NOT s1_11/s1_14; s1↔s2 boundary
 s1_16:   s1_14 ✅, s1_15 ✅, s2_1 ✅, s2_2 ✅(s2), gara_kulon ✅   # 5 nbrs; NOT s5_9
