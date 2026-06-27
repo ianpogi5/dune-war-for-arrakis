@@ -280,7 +280,7 @@ Each line lists known neighbors so far; we complete each area's full list over t
 ```
 shield_wall_1 (s5_mtn4):  gara_kulon (s1_nd1), <a minor erg in s5 = s5_erg4 or s5_erg5>
 shield_wall_2 (s8_mtn2):  arsunt (s8_plt1), hagga_basin (s8_plt2)
-wind_pass     (s8_nd1):   north_pole (np), splintered_rock (s8_mtn1), s8_4, s8_2   # NOT false_wall_west
+wind_pass     (s8_nd1):   north_pole (np), splintered_rock (s8_mtn1), s8_4, s8_2, s5_3   # NOT false_wall_west
 s8_3:                     bight_of_the_cliff, s4_12, s4_13, s8_1, s8_4, s3_3, s7_1   # COMPLETE (7 nbrs); 4-sector junction
 north_pole    (np):       wind_pass (s8), s5_3, s6_1, s7_4   # ✅ COMPLETE — exactly one area per inner sector
 ```
@@ -473,9 +473,9 @@ crossing. Mountain web (Rimwall West / Hole in the Rock / North Pole) still 🟡
 ```
 s5_1:  carthag ✅, arrakeen ✅, imperial_basin ✅, hagga_basin ✅, hole_in_the_rock ✅, s5_2 ✅   # central PLATEAU (s5_plt4); 6 nbrs
 s5_2:  hagga_basin ✅, hole_in_the_rock ✅, s5_3 ✅, s5_1 ✅, splintered_rock ✅   # 5 nbrs
-s5_3:  hole_in_the_rock ✅, north_pole ✅, s5_2 ✅, s5_4 ✅, s5_5 ✅   # the s5 area touching the pole
+s5_3:  hole_in_the_rock ✅, north_pole ✅, s5_2 ✅, s5_4 ✅, s6_1 ✅(s6), wind_pass ✅(s8)   # pole-ring; 6 nbrs; NOT s5_5
 s5_4:  imperial_basin ✅, hole_in_the_rock ✅, s5_3 ✅, s5_7 🟡
-s5_5:  imperial_basin ✅, rimwall_west ✅, s5_3 ✅, s5_6 ✅, s5_7 🟡
+s5_5:  imperial_basin ✅, rimwall_west ✅, s5_6 ✅, s5_7 🟡   # NOT s5_3
 s5_6:  s5_5 ✅, s5_8 ✅, s1_7 ✅   # + shield_wall_1 = RED impassable (§4); NOT rimwall_west / s5_9
 s5_7:  s5_8 ✅, s5_4 🟡, s5_5 🟡   # air zone (NOT north_pole)
 s5_8:  s5_7 ✅, s5_9 ✅, s5_6 ✅, s5_5 🟡
@@ -494,7 +494,8 @@ gara_kulon:     s1_11 ✅, s1_12 ✅, s1_14 ✅, s1_15 ✅, s1_16 ✅, shield_wa
 sector, nothing else. (Corrects earlier guesses: NOT splintered_rock / hole_in_the_rock / false walls / hagga_basin.)
 **Open s5 (round 3):** s5_6's neighbours (only s5_5 known) · s5_7↔s5_4/s5_5 · s5_8↔s5_5 · splintered_rock↔s5_2 ·
 which s5 areas are the 2 minor-ergs + 1 nd (s5_6/7/8?) · shield_wall_1's s5 minor-erg.
-**s5→inner reciprocals to mirror:** north_pole↔{s6_1, s7_4} · rimwall_west↔{s1_4, s1_5} (impassable §4).
+**s5→inner reciprocals to mirror:** north_pole↔{s6_1, s7_4} · rimwall_west↔{s1_4, s1_5} (impassable §4) ·
+s5_3↔s6_1 (pole-ring).
 
 ### 3b. Earlier photo-based DRAFT (UNVERIFIED — my geography proved unreliable; supersede with 3a)
 
