@@ -527,8 +527,9 @@ s7_4:  north_pole ✅, s6_1 ✅(s6), s7_3 ✅, s7_5 ✅, wind_pass ✅(s8)   # �
 s7_5:  s6_1 ✅(s6), s6_4 ✅(s6), s7_3 ✅, s7_4 ✅, s7_6 ✅, windgap ✅   # ✅ 6 nbrs
 s7_6:  s3_9 ✅(s3), s6_4 ✅(s6), s6_5 ✅(s6), s7_5 ✅, windgap ✅   # ✅ 5 nbrs
 false_wall_west: s3_5 ✅(s3), s3_8 ✅(s3), s7_1 ✅, s7_2 ✅, windgap ✅   # ✅ 5 nbrs (plt ridge)
-windgap: s3_8 ✅(s3), s3_9 ✅(s3), s7_2 ✅, s7_3 ✅, s7_5 ✅, s7_6 ✅, false_wall_west ✅   # sietch
+windgap: s3_8 ✅(s3), s3_9 ✅(s3), s7_2 ✅, s7_3 ✅, s7_5 ✅, s7_6 ✅, false_wall_west ✅   # ✅ 7 nbrs sietch
 ```
+**s7 ✅ area-by-area VERIFIED 2026-06-27 (all 8 areas).**
 
 ### 3b. Earlier photo-based DRAFT (UNVERIFIED — my geography proved unreliable; supersede with 3a)
 
