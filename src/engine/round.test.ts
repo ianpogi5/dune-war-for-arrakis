@@ -7,8 +7,10 @@ import {
   nextPhase,
   drawTacticalCards,
   reselectTargetSietch,
+  shuffle,
+  startNextRound,
 } from './round';
-import type { TacticalCard } from './state';
+import type { GameState, TacticalCard } from './state';
 
 describe('tactical cards', () => {
   it('has exactly 8 cards, one per sietch', () => {
@@ -86,6 +88,70 @@ describe('drawTacticalCards', () => {
   it('throws when no eligible target exists', () => {
     const deck = [card('gara_kulon', 's1'), card('sihaya_ridge', 's1')];
     expect(() => drawTacticalCards(deck)).toThrow();
+  });
+});
+
+describe('shuffle', () => {
+  it('keeps the same elements (permutation)', () => {
+    const out = shuffle([1, 2, 3, 4, 5], () => 0.42);
+    expect([...out].sort()).toEqual([1, 2, 3, 4, 5]);
+  });
+});
+
+function miniState(over: Partial<GameState> = {}): GameState {
+  return {
+    round: 2,
+    phase: 'end',
+    settlements: [],
+    sietches: TACTICAL_CARDS.map((c) => ({ area: c.sietchId, rank: 1 as const, revealed: false, destroyed: false })),
+    testingStations: [],
+    legions: [],
+    vehicles: [],
+    wormsigns: [],
+    sandworms: [],
+    harvestingSector: null,
+    targetSietchId: null,
+    spice: { markers: { choam: 3, spacing_guild: 3, landsraad: 3 }, activeBans: [], spiceReserve: 0 },
+    tracks: { supremacy: 4, prescience: [0, 0, 0] },
+    decks: {
+      planning: { house_atreides: 10, fremen_ally: 10, house_harkonnen: 10, corrino_ally: 10 },
+      planningDiscard: { house_atreides: 0, fremen_ally: 0, house_harkonnen: 0, corrino_ally: 0 },
+      prescienceDeck: 16,
+      reinforcements: 0,
+      wormsignPool: 16,
+      tacticalDeck: 8,
+    },
+    harkonnenReserve: { units: { regular: 10, elite: 6, special_elite: 6 }, deploymentTokens: 8, bashars: 2, namedLeaders: [] },
+    beneGesserit: { atreides: 1, reserve: 4 },
+    harkonnenUnusedDice: 0,
+    atreidesUnusedDice: 0,
+    ...over,
+  };
+}
+
+describe('startNextRound', () => {
+  it('advances the round and supremacy, draws harvesting + target', () => {
+    const { state, harkonnenWins } = startNextRound(miniState(), () => 0);
+    expect(state.round).toBe(3);
+    expect(state.tracks.supremacy).toBe(5);
+    expect(state.phase).toBe('vehicle_placement');
+    expect(state.harvestingSector).not.toBeNull();
+    expect(state.targetSietchId).not.toBeNull();
+    expect(harkonnenWins).toBe(false);
+  });
+
+  it('reports a Harkonnen win when supremacy reaches 10', () => {
+    const { state, harkonnenWins } = startNextRound(miniState({ tracks: { supremacy: 9, prescience: [0, 0, 0] } }), () => 0);
+    expect(state.tracks.supremacy).toBe(10);
+    expect(harkonnenWins).toBe(true);
+  });
+
+  it('does not draw a destroyed sietch as the target', () => {
+    const s = miniState();
+    const live = s.sietches.map((si) => (si.area === 'gara_kulon' ? si : { ...si, destroyed: true }));
+    // only gara_kulon alive → it must be harvesting or target, never a destroyed one
+    const { state } = startNextRound({ ...s, sietches: live }, () => 0);
+    if (state.targetSietchId) expect(state.targetSietchId).toBe('gara_kulon');
   });
 });
 

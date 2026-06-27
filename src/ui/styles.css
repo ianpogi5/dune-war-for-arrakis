@@ -159,6 +159,25 @@ header h1 {
   color: #234;
 }
 
+.win-banner {
+  margin-bottom: 0.6rem;
+  padding: 0.6rem 0.8rem;
+  background: var(--accent);
+  color: #fff;
+  border-radius: 8px;
+  font-weight: 700;
+  text-align: center;
+}
+
+.confirm-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.panel > .confirm-btn {
+  margin-top: 0.8rem;
+}
+
 footer {
   margin-top: 1rem;
   text-align: center;

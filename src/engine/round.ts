@@ -7,7 +7,7 @@
 //  - End of round: advance the supremacy marker 1 step; reshuffle all 8 tactical cards.
 
 import { AREAS, type SectorId } from './board';
-import type { RoundPhase, TacticalCard, TacticalSector } from './state';
+import type { GameState, RoundPhase, TacticalCard, TacticalSector } from './state';
 
 // ---------------------------------------------------------------------------
 // Sectors: the 4 sectors adjacent to the North Pole are "central" and a tactical
@@ -126,3 +126,52 @@ export const SUPREMACY_WIN = 10;
 
 /** Atreides draws this many prescience cards each round in solo mode (2, not 3). */
 export const PRESCIENCE_DRAW_SOLO = 2;
+
+/** Fisher–Yates shuffle (pure; returns a new array). `rng` returns [0,1). */
+export function shuffle<T>(arr: readonly T[], rng: () => number = Math.random): T[] {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(rng() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+export interface NextRoundResult {
+  state: GameState;
+  /** True if advancing supremacy reached the win threshold (Harkonnen victory). */
+  harkonnenWins: boolean;
+}
+
+/**
+ * Begin the next solo round: advance the supremacy marker by 1 (end-of-round rule, capped at the
+ * win step), then reshuffle the tactical deck and draw the harvesting sector + target sietch.
+ * Sietches already destroyed are skipped for the target. `rng` is injectable for deterministic tests.
+ */
+export function startNextRound(s: GameState, rng: () => number = Math.random): NextRoundResult {
+  const supremacy = Math.min(SUPREMACY_WIN, s.tracks.supremacy + SUPREMACY_PER_ROUND);
+  const isDestroyed = (id: string) => s.sietches.find((si) => si.area === id)?.destroyed ?? false;
+
+  const deck = shuffle(TACTICAL_CARDS, rng);
+  let harvestingSector: TacticalSector = deck[0].sector;
+  let targetSietchId: string | null = null;
+  try {
+    const draw = drawTacticalCards(deck, isDestroyed);
+    harvestingSector = draw.harvestingSector;
+    targetSietchId = draw.targetSietchId;
+  } catch {
+    // No eligible target (e.g. few sietches left) — leave target unset for the player to pick.
+  }
+
+  return {
+    state: {
+      ...s,
+      round: s.round + 1,
+      phase: 'vehicle_placement',
+      tracks: { ...s.tracks, supremacy },
+      harvestingSector,
+      targetSietchId,
+    },
+    harkonnenWins: supremacy >= SUPREMACY_WIN,
+  };
+}

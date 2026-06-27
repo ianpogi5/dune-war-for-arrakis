@@ -3,6 +3,7 @@ import type { ActionResult, GameState } from '../engine/state';
 import { resolveAction } from '../engine/harkonnenActions';
 import { applyHarkonnenAction, isAutoApplied } from '../engine/applyAction';
 import { availability } from '../engine/spiceMustFlow';
+import { startNextRound, SUPREMACY_WIN } from '../engine/round';
 import { placeVehicles } from '../engine/vehiclePlacement';
 import { describeAction, actionHeadline, areaLabel } from './describeAction';
 import { sampleState } from './sampleState';
@@ -18,14 +19,30 @@ const DIE_LABEL: Record<ActionResult, string> = {
   house: 'House',
 };
 
-function RoundPanel({ s }: { s: GameState }) {
+function RoundPanel({ s, onChange }: { s: GameState; onChange: (next: GameState) => void }) {
   const avail = availability(s.spice.markers);
+  const won = s.tracks.supremacy >= SUPREMACY_WIN;
+
+  const nextRound = () => {
+    const { state, harkonnenWins } = startNextRound(s);
+    onChange(state);
+    if (harkonnenWins) {
+      // The win banner renders from state; this just surfaces it immediately.
+      setTimeout(() => alert('Harkonnen reach supremacy 10 — Harkonnen victory.'), 0);
+    }
+  };
+
   return (
     <section className="panel">
       <h2>This round</h2>
+      {won && <div className="win-banner">Harkonnen victory — supremacy {SUPREMACY_WIN} reached.</div>}
       <dl className="kv">
         <dt>Round</dt>
         <dd>{s.round}</dd>
+        <dt>Supremacy</dt>
+        <dd>
+          {s.tracks.supremacy} / {SUPREMACY_WIN}
+        </dd>
         <dt>Harvesting sector</dt>
         <dd>{s.harvestingSector ?? '—'}</dd>
         <dt>Target sietch</dt>
@@ -39,6 +56,9 @@ function RoundPanel({ s }: { s: GameState }) {
         <dt>Active imperium bans</dt>
         <dd>{s.spice.activeBans.length ? s.spice.activeBans.join(', ') : 'none'}</dd>
       </dl>
+      <button className="confirm-btn" onClick={nextRound} disabled={won}>
+        Start next round
+      </button>
     </section>
   );
 }
@@ -144,7 +164,7 @@ export function App() {
         <p className="subtitle">Mahdi solo companion — Harkonnen AI</p>
       </header>
       <main>
-        <RoundPanel s={s} />
+        <RoundPanel s={s} onChange={setS} />
         <ResolvePanel s={s} onApply={setS} />
         <VehiclePanel s={s} />
         <StateEditor s={s} onChange={setS} onReset={reset} />
