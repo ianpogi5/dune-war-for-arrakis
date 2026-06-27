@@ -33,9 +33,20 @@ describe('areas', () => {
     expect(Object.values(AREAS).filter((a) => a.sietch).length).toBe(8);
   });
 
-  it('the 3 deep-desert named areas are flagged', () => {
-    const deep = Object.values(AREAS).filter((a) => a.deep === true).map((a) => a.id).sort();
-    expect(deep).toEqual(['rock_outcroppings', 'sihaya_ridge', 'the_great_flat']);
+  it('deep flag implies desert terrain, and the 3 named deep areas are flagged', () => {
+    for (const a of Object.values(AREAS)) {
+      if (a.deep === true) expect(a.terrain, `${a.id} deep but not desert`).toBe('desert');
+    }
+    for (const id of ['rock_outcroppings', 'sihaya_ridge', 'the_great_flat']) {
+      expect(AREAS[id].deep).toBe(true);
+    }
+  });
+
+  it('s1 is fully typed: all desert, exactly 7 deep', () => {
+    const s1 = Object.values(AREAS).filter((a) => a.sector === 's1');
+    expect(s1.length).toBe(18);
+    expect(s1.every((a) => a.terrain === 'desert')).toBe(true);
+    expect(s1.filter((a) => a.deep === true).length).toBe(7);
   });
 });
 

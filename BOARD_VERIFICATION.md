@@ -641,3 +641,18 @@ also link zone-to-zone (an ornithopter flight network) is a movement-rule detail
 > **Structure (8 zones):** 4 link the **inner ring** (s5–s8: az2 s5–s8, az4 s5–s6, az6 s6–s7, az7 s7–s8)
 > and 4 are **spokes** from each outer sector to its inner neighbour (az1 s1–s5, az3 s4–s8, az5 s2–s6,
 > az8 s3–s7). az1's areas are exactly the impassable-ground crossing (§4), so air is the only link there.
+
+---
+
+## 6. Per-area terrain (collected per sector — feeds `terrain`/`deep` in board.ts)
+
+**Format** (parsed by `scripts/gen_board.py`):
+- `TERRAIN <sector>: <terrain> = <id,id,... | ALL>` — assign a terrain to those areas (`ALL` = every
+  area in the sector). Named areas are already typed in §1 but may be reaffirmed here.
+- `DEEP <sector>: <id,id,...>` — these (and only these) areas in the sector are deep desert (`deep=true`);
+  every other desert area in the sector is `deep=false`.
+
+```
+TERRAIN s1: desert = ALL
+DEEP s1: s1_1, s1_2, s1_10, s1_13, s1_14, s1_16, sihaya_ridge
+```
