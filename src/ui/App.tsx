@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import type { ActionResult, GameState } from '../engine/state';
 import { resolveAction } from '../engine/harkonnenActions';
+import { applyHarkonnenAction, isAutoApplied } from '../engine/applyAction';
 import { availability } from '../engine/spiceMustFlow';
 import { placeVehicles } from '../engine/vehiclePlacement';
 import { describeAction, actionHeadline, areaLabel } from './describeAction';
@@ -71,20 +72,33 @@ function VehiclePanel({ s }: { s: GameState }) {
   );
 }
 
-function ResolvePanel({ s }: { s: GameState }) {
+function ResolvePanel({ s, onApply }: { s: GameState; onApply: (next: GameState) => void }) {
   const [result, setResult] = useState<ActionResult | null>(null);
+  const [note, setNote] = useState<string | null>(null);
   const action = useMemo(() => (result ? resolveAction(s, result) : null), [s, result]);
+
+  const pick = (r: ActionResult) => {
+    setResult(r);
+    setNote(null);
+  };
+
+  const confirm = () => {
+    if (!action) return;
+    const res = applyHarkonnenAction(s, action);
+    setNote(res.note ?? null);
+    if (res.applied) {
+      onApply(res.state);
+      setResult(null); // ready for the next die roll
+    }
+  };
+
   return (
     <section className="panel">
       <h2>Resolve Harkonnen turn</h2>
       <p className="hint">Roll the Harkonnen action die, then tap the result:</p>
       <div className="die-row">
         {DIE_RESULTS.map((r) => (
-          <button
-            key={r}
-            className={r === result ? 'die selected' : 'die'}
-            onClick={() => setResult(r)}
-          >
+          <button key={r} className={r === result ? 'die selected' : 'die'} onClick={() => pick(r)}>
             {DIE_LABEL[r]}
           </button>
         ))}
@@ -93,8 +107,18 @@ function ResolvePanel({ s }: { s: GameState }) {
         <div className="directive">
           <div className="directive-head">{actionHeadline(action)}</div>
           <p className="directive-text">{describeAction(action)}</p>
+          <div className="directive-actions">
+            {isAutoApplied(action) ? (
+              <button className="confirm-btn" onClick={confirm}>
+                Confirm &amp; apply
+              </button>
+            ) : action.kind === 'none' ? null : (
+              <span className="manual-note">Resolve this on the board, then update the state below.</span>
+            )}
+          </div>
         </div>
       )}
+      {note && <p className="apply-note">{note}</p>}
     </section>
   );
 }
@@ -121,7 +145,7 @@ export function App() {
       </header>
       <main>
         <RoundPanel s={s} />
-        <ResolvePanel s={s} />
+        <ResolvePanel s={s} onApply={setS} />
         <VehiclePanel s={s} />
         <StateEditor s={s} onChange={setS} onReset={reset} />
       </main>

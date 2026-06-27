@@ -125,6 +125,40 @@ header h1 {
   font-size: 1.05rem;
 }
 
+.directive-actions {
+  margin-top: 0.6rem;
+}
+
+.confirm-btn {
+  padding: 0.5rem 0.9rem;
+  border: none;
+  background: var(--accent);
+  color: #fff;
+  border-radius: 8px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.confirm-btn:hover {
+  filter: brightness(1.08);
+}
+
+.manual-note {
+  font-size: 0.9rem;
+  color: #6a583c;
+  font-style: italic;
+}
+
+.apply-note {
+  margin: 0.7rem 0 0;
+  padding: 0.5rem 0.7rem;
+  background: #eef3ea;
+  border-left: 4px solid #2f5d50;
+  border-radius: 6px;
+  font-size: 0.92rem;
+  color: #234;
+}
+
 footer {
   margin-top: 1rem;
   text-align: center;
