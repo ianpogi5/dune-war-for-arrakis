@@ -42,11 +42,17 @@ describe('areas', () => {
     }
   });
 
-  it('s1 is fully typed: all desert, exactly 7 deep', () => {
-    const s1 = Object.values(AREAS).filter((a) => a.sector === 's1');
-    expect(s1.length).toBe(18);
-    expect(s1.every((a) => a.terrain === 'desert')).toBe(true);
-    expect(s1.filter((a) => a.deep === true).length).toBe(7);
+  it('every area is fully terrain-typed, with grand totals matching §2', () => {
+    const counts: Record<string, number> = {};
+    let deep = 0;
+    for (const a of Object.values(AREAS)) {
+      expect(a.terrain, `${a.id} has no terrain`).not.toBeNull();
+      expect(a.deep, `${a.id} has null deep`).not.toBeNull();
+      counts[a.terrain as string] = (counts[a.terrain as string] ?? 0) + 1;
+      if (a.deep) deep++;
+    }
+    expect(counts).toEqual({ plateau: 12, mountain: 19, minor_erg: 5, desert: 65 });
+    expect(deep).toBe(23);
   });
 });
 

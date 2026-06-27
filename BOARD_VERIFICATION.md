@@ -683,4 +683,12 @@ TERRAIN s5: mountain = broken_land, rimwall_west, hole_in_the_rock, shield_wall_
 TERRAIN s5: minor_erg = s5_7, s5_8
 TERRAIN s5: desert = s5_3
 DEEP s5: (none)
+
+TERRAIN s8: plateau = arsunt, hagga_basin
+TERRAIN s8: mountain = splintered_rock, shield_wall_2, s8_1, s8_2
+TERRAIN s8: desert = wind_pass, s8_3, s8_4
+DEEP s8: (none)
 ```
+
+> ✅ **All 8 sectors typed (2026-06-27)** — every one of the 101 areas now has a terrain (and deep flag).
+> Grand totals: plateau 12 · mountain 19 · minor_erg 5 · desert 65 (of which deep 23) = 101. Matches §2.

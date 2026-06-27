@@ -52,8 +52,9 @@ Living file: `BOARD_VERIFICATION.md`. Extracted from physical-board photos in `d
 - [x] Generated typed board module `src/engine/board.ts` from `BOARD_VERIFICATION.md` via
       `scripts/gen_board.py` (`npm run gen:board`): 101 `AREAS` (id/name/sector/terrain/deep/
       settlement/sietch), symmetric `ADJACENCY` (265 edges), `IMPASSABLE` (11), `AIR_ZONES` (8).
-      ⚠️ **Gap:** `terrain`/`deep` are `null` for most UNNAMED areas (never individually typed —
-      only sector-level counts known). Graph is complete; terrain typing is a later focused pass.
+      ✅ **Terrain complete (2026-06-27):** all 101 areas typed via §6 of `BOARD_VERIFICATION.md`
+      (per-sector TERRAIN/DEEP lines, user-dictated). Totals: plateau 12 · mountain 19 · minor_erg 5 ·
+      desert 65 (deep 23) — match §2. No untyped areas remain.
 - [x] Helpers in `src/engine/graph.ts` (neighbors / areAdjacent / isImpassable / airZonesOf /
       shortestGroundPath) + Vitest suite `board.test.ts` — **14 tests pass**: 101 areas, symmetric &
       connected graph, no isolated nodes, impassable disjoint from passable, air zones valid.
