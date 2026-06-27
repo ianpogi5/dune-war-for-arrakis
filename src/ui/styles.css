@@ -226,6 +226,14 @@ footer {
   width: 3.4rem;
 }
 
+.ed-grid label.grow {
+  flex: 1 1 14rem;
+}
+
+.ed-grid label.grow input[type='text'] {
+  width: 100%;
+}
+
 .feature-list {
   display: flex;
   flex-direction: column;

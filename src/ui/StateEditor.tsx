@@ -80,6 +80,10 @@ export function StateEditor({
   const updateSettlement = (i: number, patch: Partial<SettlementState>) =>
     onChange({ ...s, settlements: s.settlements.map((st, idx) => (idx === i ? { ...st, ...patch } : st)) });
 
+  const r = s.harkonnenReserve;
+  const setReserveUnit = (key: UnitType, value: number) =>
+    onChange({ ...s, harkonnenReserve: { ...r, units: { ...r.units, [key]: clamp(value, 0, 16) } } });
+
   const liveSietches = s.sietches.filter((si) => !si.destroyed);
 
   return (
@@ -194,6 +198,55 @@ export function StateEditor({
             </label>
           </div>
         ))}
+      </div>
+
+      <h3>Harkonnen reserve (off-board, available to deploy)</h3>
+      <div className="ed-grid">
+        {UNIT_TYPES.map(({ key, label }) => (
+          <label key={key}>
+            {label}
+            <input type="number" min={0} max={16} value={r.units[key]} onChange={(e) => setReserveUnit(key, Number(e.target.value))} />
+          </label>
+        ))}
+        <label>
+          Deploy tokens
+          <input
+            type="number"
+            min={0}
+            max={12}
+            value={r.deploymentTokens}
+            onChange={(e) => onChange({ ...s, harkonnenReserve: { ...r, deploymentTokens: clamp(Number(e.target.value), 0, 12) } })}
+          />
+        </label>
+        <label>
+          Bashars
+          <input
+            type="number"
+            min={0}
+            max={6}
+            value={r.bashars}
+            onChange={(e) => onChange({ ...s, harkonnenReserve: { ...r, bashars: clamp(Number(e.target.value), 0, 6) } })}
+          />
+        </label>
+        <label className="grow">
+          Named leaders (comma-separated)
+          <input
+            type="text"
+            value={r.namedLeaders.join(', ')}
+            onChange={(e) =>
+              onChange({
+                ...s,
+                harkonnenReserve: {
+                  ...r,
+                  namedLeaders: e.target.value
+                    .split(',')
+                    .map((n) => n.trim())
+                    .filter(Boolean),
+                },
+              })
+            }
+          />
+        </label>
       </div>
 
       <h3>Legions</h3>

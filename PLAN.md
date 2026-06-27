@@ -124,8 +124,9 @@ Pure TS + tests, no UI. Model the round and the priority cascades from fan-summa
 - [~] Board-state editor (`src/ui/StateEditor.tsx`): state lifted into App; edit imperium markers
       (auto-derives bans), harvesting sector, target sietch, add/edit/remove legions (area, unit
       counts, generic/named leaders), and **sietch rank/revealed/destroyed + settlement destroyed
-      toggles** (destroying the target sietch clears the target). Resolver + panels react live.
-      TODO: wormsign/sandworm + on-board vehicle (ornithopter) placement, reserve.
+      toggles** (destroying the target sietch clears the target), and the **Harkonnen reserve**
+      (off-board units/deploy-tokens/bashars/named leaders that deployment draws from). Resolver +
+      panels react live. TODO: wormsign/sandworm + on-board vehicle (ornithopter) placement.
 - [ ] Sync the few Atreides-side changes the AI depends on
 
 ### Phase 4 — Persistence
