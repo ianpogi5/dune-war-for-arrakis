@@ -431,7 +431,7 @@ the_great_flat: s4_5 ✅, s4_6 ✅, s4_12 ✅, s3_1 ✅, s3_2 ✅       # deep-d
 (along the Shield Wall crest), NOT between the desert and the mountains. s4_16 is a **mountain** area on the
 city side and is freely passable to Arsunt / Shield Wall #2 / Broken Land. So the north desert DOES connect
 to the cities via s4_16. Only s4_15↔s4_16 is sealed here. (Revisit full §4 extent when tracing s5/s8.)
-**s4 fully resolved.**
+**s4 fully resolved. ✅ area-by-area VERIFIED 2026-06-27.**
 
 ### 3a-s8. Sector s8 (NW-inner, 9 areas) — PARTIAL (dense mountain core; needs your direct lists)
 ✅ clear/known · 🟡 guess. Pre-known: s8_3 COMPLETE (§3a) · shield_wall_2↔{arsunt, hagga_basin} (§3a) ·
