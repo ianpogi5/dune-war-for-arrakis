@@ -478,7 +478,7 @@ s5_4:  imperial_basin ✅, hole_in_the_rock ✅, s5_3 ✅, s5_5 ✅, s5_7 ✅, s
 s5_5:  imperial_basin ✅, rimwall_west ✅, s5_4 ✅, s5_6 ✅, s5_7 ✅, s5_8 ✅   # 6 white + s1_5/s1_7 RED §4 = 8 total; NOT s5_3
 s5_6:  s5_5 ✅, s5_8 ✅, s1_7 ✅   # + shield_wall_1 = RED impassable (§4); NOT rimwall_west / s5_9
 s5_7:  s5_8 ✅, s5_4 ✅, s5_5 ✅, false_wall_east ✅(s6), s6_2 ✅(s6)   # 5 nbrs; air zone (NOT north_pole)
-s5_8:  s5_7 ✅, s5_9 ✅, s5_6 ✅, s5_5 ✅
+s5_8:  s5_7 ✅, s5_9 ✅, s5_6 ✅, s5_5 ✅, shield_wall_1 ✅, s6_2 ✅(s6)   # 6 nbrs
 s5_9:  gara_kulon ✅, shield_wall_1 ✅, s1_15 ✅, s5_8 ✅, pasty_mesa ✅(s2)   # NOT s5_6, NOT s1_11/12/14/16
 # Named hubs:
 carthag:        arsunt ✅, arrakeen ✅, hagga_basin ✅, broken_land ✅, s5_1 ✅   # COMPLETE (NOT imperial_basin)
@@ -487,7 +487,7 @@ imperial_basin: arrakeen ✅, hole_in_the_rock ✅, rimwall_west ✅, s5_1 ✅, 
 hole_in_the_rock: imperial_basin ✅, s5_1 ✅, s5_2 ✅, s5_3 ✅, s5_4 ✅   # ✅ COMPLETE (embedded in s5)
 rimwall_west:   broken_land ✅, arrakeen ✅, imperial_basin ✅, s5_5 ✅, s1_4 ✅, s1_5 ✅   # ✅ COMPLETE; s1_4/s1_5 = RED impassable arc (§4)
 broken_land:    carthag ✅, arrakeen ✅, rimwall_west ✅, s4_16 ✅, arsunt 🟡   # + s4_11 RED §4, + s1_3 RED §4(?)
-shield_wall_1:  gara_kulon ✅, s5_9 ✅, s1_11 ✅, <an s5 minor erg> ✅   # + s5_6 = RED impassable (§4)
+shield_wall_1:  gara_kulon ✅, s5_9 ✅, s5_8 ✅, s1_11 ✅, <an s5 minor erg> ✅   # + s5_6 = RED impassable (§4)
 gara_kulon:     s1_11 ✅, s1_12 ✅, s1_14 ✅, s1_15 ✅, s1_16 ✅, shield_wall_1 ✅, s5_9 ✅
 ```
 **🌟 North Pole COMPLETE (user):** `north_pole: wind_pass(s8), s5_3, s6_1, s7_4` — exactly ONE area per inner
@@ -495,7 +495,7 @@ sector, nothing else. (Corrects earlier guesses: NOT splintered_rock / hole_in_t
 **Open s5 (round 3):** s5_6's neighbours (only s5_5 known) · s5_7↔s5_4/s5_5 · s5_8↔s5_5 · splintered_rock↔s5_2 ·
 which s5 areas are the 2 minor-ergs + 1 nd (s5_6/7/8?) · shield_wall_1's s5 minor-erg.
 **s5→inner reciprocals to mirror:** north_pole↔{s6_1, s7_4} · rimwall_west↔{s1_4, s1_5} (impassable §4) ·
-s5_3↔s6_1 (pole-ring) · s5_4↔{s6_1, false_wall_east} · s5_7↔{false_wall_east, s6_2}.
+s5_3↔s6_1 (pole-ring) · s5_4↔{s6_1, false_wall_east} · s5_7↔{false_wall_east, s6_2} · s5_8↔s6_2.
 
 ### 3b. Earlier photo-based DRAFT (UNVERIFIED — my geography proved unreliable; supersede with 3a)
 
