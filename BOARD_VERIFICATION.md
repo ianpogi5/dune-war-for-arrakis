@@ -447,7 +447,7 @@ splintered_rock/s8_2/shield_wall_2 — **NOT north_pole, NOT imperial_basin (air
 s8_1:    s8_3 ✅, s4_13 ✅, s4_14 ✅                   # s8_1↔s8_2 & s8_1↔Shield Wall #2 = RED impassable (§4)
 s8_2:    splintered_rock ✅, hagga_basin ✅, wind_pass ✅, s8_4 ✅   # unnamed MTN; +s8_1 RED; +shield_wall_2 🟡(red?)
 s8_3:    bight_of_the_cliff ✅, s4_12 ✅, s4_13 ✅, s8_1 ✅, s8_4 ✅, s3_3 ✅, s7_1 ✅   # COMPLETE
-s8_4:    s8_3 ✅, s8_2 ✅, wind_pass ✅                 # NOT splintered_rock
+s8_4:    s8_3 ✅, s8_2 ✅, wind_pass ✅, s7_1 ✅(s7)     # NOT splintered_rock
 arsunt:        shield_wall_2 ✅, s4_16 ✅, hagga_basin ✅, broken_land ✅, carthag 🟡   # city I (carthag → confirm)
 hagga_basin:   arsunt ✅, carthag ✅, s5_1 ✅, s5_2 ✅, splintered_rock ✅, s8_2 ✅, shield_wall_2 ✅   # city I; NOT north_pole / imperial_basin(air zone)
 splintered_rock: wind_pass ✅, s8_2 ✅, hagga_basin ✅, s5_2 ✅, false_wall_east 🟡, false_wall_west 🟡   # NOT s8_4, NOT north_pole, NOT hole_in_the_rock
@@ -520,13 +520,13 @@ Areas: s7_1..s7_6, False Wall West, Windgap. Layout (south-west.jpg): s7_1 top-r
 False Wall West) · s7_2 on the FWW ridge · s7_3 center · s7_4 right (by North Pole) · s7_5 center-right ·
 s7_6 bottom. Seeded edges (verify in pass):
 ```
-s7_1:  s3_3 ✅(s3), s8_3 ✅(s8), s3_5 ✅(s3), ...           # seeded (s3/s4/s7/s8 junction area)
-s7_2:  ...                                                 # unknown (on FWW ridge)
+s7_1:  s3_3 ✅(s3), s8_3 ✅(s8), s3_5 ✅(s3), false_wall_west ✅, s7_2 ✅, s8_4 ✅(s8)   # ✅ 6 nbrs
+s7_2:  s7_1 ✅, ...                                         # seeded (on FWW ridge)
 s7_3:  ...                                                 # unknown
 s7_4:  north_pole ✅, s6_1 ✅(s6), ...                      # seeded (pole-ring)
 s7_5:  s6_1 ✅(s6), s6_4 ✅(s6), ...                        # seeded
 s7_6:  s3_9 ✅(s3), s6_4 ✅(s6), s6_5 ✅(s6), ...            # seeded
-false_wall_west: s3_5 ✅(s3), s3_8 ✅(s3), ...             # seeded (plt ridge)
+false_wall_west: s3_5 ✅(s3), s3_8 ✅(s3), s7_1 ✅, ...     # seeded (plt ridge)
 windgap: s3_8 ✅(s3), s3_9 ✅(s3), ...                     # seeded (sietch)
 ```
 
