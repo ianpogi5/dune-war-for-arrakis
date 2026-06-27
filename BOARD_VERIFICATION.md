@@ -677,4 +677,10 @@ DEEP s7: (none)
 TERRAIN s4: mountain = s4_13, s4_14, s4_15, s4_16
 TERRAIN s4: desert = s4_1, s4_2, s4_3, s4_4, s4_5, s4_6, s4_7, s4_8, s4_9, s4_10, s4_11, s4_12, the_funeral_plain, rock_outcroppings, bight_of_the_cliff, the_great_flat
 DEEP s4: s4_1, s4_2, s4_3, s4_5, rock_outcroppings, the_great_flat
+
+TERRAIN s5: plateau = carthag, arrakeen, imperial_basin, s5_9
+TERRAIN s5: mountain = broken_land, rimwall_west, hole_in_the_rock, shield_wall_1, s5_1, s5_2, s5_4, s5_5, s5_6
+TERRAIN s5: minor_erg = s5_7, s5_8
+TERRAIN s5: desert = s5_3
+DEEP s5: (none)
 ```
