@@ -62,6 +62,11 @@ Living file: `BOARD_VERIFICATION.md`. Extracted from physical-board photos in `d
 
 ### Phase 2 — Headless Harkonnen AI engine  *(the core value)*
 Pure TS + tests, no UI. Model the round and the priority cascades from fan-summary p9:
+- [x] **Spice Must Flow board** (`src/engine/spiceMustFlow.ts`, 13 tests): data captured from the
+      physical SMF board (5 rows; per-row dice + harvester/ornithopter/carryall counts; bottom =
+      Imperium Ban). `activeRow`/`availability`/`activeBans`; `resolveSpiceHarvesting` (solo
+      allocation: keep lowermost first @2, raise surplus @3, all-top+7 → supremacy, reserve ≤1).
+      ⚠ per-row dice availability [8,7,6,5,4] inferred from the "dice set aside" slots — confirm in play.
 - [x] Game-state types (`src/engine/state.ts`): legions (units/deploy tokens/leaders),
       settlements/sietches/testing-stations state, vehicles, wormsign/sandworm, tactical cards,
       Spice Must Flow + imperium bans, tracks, decks, action dice, round phases, `GameState`.
