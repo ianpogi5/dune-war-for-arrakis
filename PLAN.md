@@ -76,7 +76,11 @@ Pure TS + tests, no UI. Model the round and the priority cascades from fan-summa
       borders, BFS distance/shortest-path with occupancy (`blocked`/`allowBlockedTarget`),
       `nearestByDistance`. TODO: ornithopter troop-transport (+1 reach; air-zone↔sector question)
       and the 5 shortest-path tie-breakers (belong with the action resolver's movement policy).
-- [ ] **Combat** resolver (dice count, casualty removal priority, when to stop, retreat)
+- [~] **Combat** resolver (`src/engine/combat.ts`, 9 tests): `combatDiceCount` (units+discards
+      +settlement rank, cap 6), `harkonnenShouldContinueAttack` (cease at ≤½ fine power; never
+      retreat), `applyHarkonnenHits` (solo casualty priority: shed extra leaders→downgrade
+      elite/sardaukar→remove regulars, keep last leader, named→regen). TODO: dice-roll/hit
+      tally (inject RNG; Hit/Shield/Special faces + leader Special abilities), full battle loop.
 - [ ] **Deployment** placement priority
 - [ ] Tests against worked examples / rulebook edge cases
 
