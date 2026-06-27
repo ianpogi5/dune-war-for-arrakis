@@ -450,7 +450,7 @@ s8_3:    bight_of_the_cliff ✅, s4_12 ✅, s4_13 ✅, s8_1 ✅, s8_4 ✅, s3_3 
 s8_4:    s8_3 ✅, s8_2 ✅, wind_pass ✅, s7_1 ✅, s7_2 ✅(s7), s8_1 ✅   # NOT splintered_rock
 arsunt:        shield_wall_2 ✅, s4_16 ✅, hagga_basin ✅, broken_land ✅, carthag ✅   # ✅ city I COMPLETE (5 nbrs)
 hagga_basin:   arsunt ✅, carthag ✅, s5_1 ✅, s5_2 ✅, splintered_rock ✅, s8_2 ✅, shield_wall_2 ✅   # city I; NOT north_pole / imperial_basin(air zone)
-splintered_rock: wind_pass ✅, s8_2 ✅, hagga_basin ✅, s5_2 ✅, false_wall_east 🟡, false_wall_west 🟡   # NOT s8_4, NOT north_pole, NOT hole_in_the_rock
+splintered_rock: wind_pass ✅, s8_2 ✅, hagga_basin ✅, s5_2 ✅   # ✅ COMPLETE 4 nbrs; NOT false_walls/s8_4/north_pole/hole_in_the_rock
 shield_wall_2: arsunt ✅, hagga_basin ✅, s4_14 ✅, s4_15 ✅, s4_16 ✅, s8_2 ✅   # W side (s8_1) = RED impassable §4
 wind_pass:     north_pole ✅, splintered_rock ✅, s8_4 ✅, s8_2 ✅      # NOT false_wall_west
 ```
