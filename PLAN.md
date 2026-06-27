@@ -66,7 +66,7 @@ Pure TS + tests, no UI. Model the round and the priority cascades from fan-summa
       physical SMF board (5 rows; per-row dice + harvester/ornithopter/carryall counts; bottom =
       Imperium Ban). `activeRow`/`availability`/`activeBans`; `resolveSpiceHarvesting` (solo
       allocation: keep lowermost first @2, raise surplus @3, all-top+7 → supremacy, reserve ≤1).
-      ⚠ per-row dice availability [8,7,6,5,4] inferred from the "dice set aside" slots — confirm in play.
+      Per-row dice availability [8,7,6,5,4] user-confirmed (top row = all 8, 1 set aside per row down).
 - [x] Game-state types (`src/engine/state.ts`): legions (units/deploy tokens/leaders),
       settlements/sietches/testing-stations state, vehicles, wormsign/sandworm, tactical cards,
       Spice Must Flow + imperium bans, tracks, decks, action dice, round phases, `GameState`.
@@ -112,8 +112,7 @@ Pure TS + tests, no UI. Model the round and the priority cascades from fan-summa
 - [ ] Tests against worked examples / rulebook edge cases
 - [ ] Remaining engine TODOs (need interaction model / a little data): planning-card +
       named-leader-special effect resolution; round driver (state mutation + player confirmation —
-      overlaps Phase 3); coriolis storms (need the 5 storm-exempt central plateaus); confirm
-      SMF per-row dice [8,7,6,5,4] in play (Feyd/Thufir supremacy-step entries now confirmed).
+      overlaps Phase 3); coriolis storms (need the 5 storm-exempt central plateaus).
 
 ### Phase 3 — React + TS UI
 - [ ] Project scaffold (Vite + React + TS + test runner)

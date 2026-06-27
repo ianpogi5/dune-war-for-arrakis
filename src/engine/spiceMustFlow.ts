@@ -11,8 +11,8 @@ export interface SmfRow {
   /** 1 (top, markers high) .. 5 (bottom, ban). */
   row: number;
   /** Harkonnen action dice available when this is the active row.
-   *  NOTE: derived from the "Dice Set Aside" column (slots on rows 2-5 → up to 4 dice set aside,
-   *  of 8 total). Confirm against play if the dice feel off. */
+   *  User-confirmed: all 8 dice at the top row (no slot); the "Dice Set Aside" column sets aside
+   *  1 die per row from row 2 down (rows 2-5 each have a slot), so available = 8 − (row − 1). */
   diceAvailable: number;
   harvesters: number;
   ornithopters: number;
