@@ -5,8 +5,11 @@ import { applyHarkonnenAction, isAutoApplied } from '../engine/applyAction';
 import { availability } from '../engine/spiceMustFlow';
 import { startNextRound, SUPREMACY_WIN } from '../engine/round';
 import { placeVehicles } from '../engine/vehiclePlacement';
-import { resolveCardPlay, applyCardSteps } from '../engine/cardEffects';
+import { resolveCardPlay } from '../engine/cardEffects';
+import { resolveLeaderSpecial } from '../engine/leaderEffects';
+import { applyEffectSteps } from '../engine/effectSteps';
 import { HOUSE_HARKONNEN_CARDS, CORRINO_ALLY_CARDS } from '../engine/planningCards';
+import { NAMED_LEADERS } from '../engine/leaders';
 import { describeAction, actionHeadline, areaLabel } from './describeAction';
 import { sampleState } from './sampleState';
 import { StateEditor } from './StateEditor';
@@ -154,33 +157,45 @@ const RAGE_SUFFIX: Record<string, string> = {
 const cardLabel = (c: { id: string; name: string }) => c.name + (RAGE_SUFFIX[c.id] ?? '');
 
 function CardPanel({ s, onApply }: { s: GameState; onApply: (next: GameState) => void }) {
-  const [cardId, setCardId] = useState('');
-  const resolution = useMemo(() => (cardId ? resolveCardPlay(cardId, s) : null), [cardId, s]);
+  // Value is prefixed: "card:<id>" or "leader:<name>".
+  const [sel, setSel] = useState('');
+  const resolution = useMemo(() => {
+    if (sel.startsWith('card:')) return resolveCardPlay(sel.slice(5), s);
+    if (sel.startsWith('leader:')) return resolveLeaderSpecial(sel.slice(7), s);
+    return null;
+  }, [sel, s]);
   const autoCount = resolution?.steps.filter((st) => st.auto).length ?? 0;
 
   const apply = () => {
     if (!resolution) return;
-    onApply(applyCardSteps(s, resolution.steps));
-    setCardId(''); // resolved — clear for the next card
+    onApply(applyEffectSteps(s, resolution.steps));
+    setSel(''); // resolved — clear for the next effect
   };
 
   return (
     <section className="panel">
-      <h2>Play a planning card</h2>
-      <p className="hint">Pick the Harkonnen card to resolve; the app applies the mechanical steps and leaves the rest to you.</p>
-      <select className="card-select" value={cardId} onChange={(e) => setCardId(e.target.value)}>
-        <option value="">— pick a Harkonnen card —</option>
-        <optgroup label="House Harkonnen">
+      <h2>Resolve a card or leader ability</h2>
+      <p className="hint">Pick a Harkonnen planning card or a named leader's special; the app applies the mechanical steps and leaves the rest to you.</p>
+      <select className="card-select" value={sel} onChange={(e) => setSel(e.target.value)}>
+        <option value="">— pick a card or leader ability —</option>
+        <optgroup label="House Harkonnen cards">
           {HOUSE_HARKONNEN_CARDS.map((c) => (
-            <option key={c.id} value={c.id}>
+            <option key={c.id} value={`card:${c.id}`}>
               {cardLabel(c)}
             </option>
           ))}
         </optgroup>
-        <optgroup label="Corrino Ally">
+        <optgroup label="Corrino Ally cards">
           {CORRINO_ALLY_CARDS.map((c) => (
-            <option key={c.id} value={c.id}>
+            <option key={c.id} value={`card:${c.id}`}>
               {cardLabel(c)}
+            </option>
+          ))}
+        </optgroup>
+        <optgroup label="Named-leader specials">
+          {NAMED_LEADERS.map((l) => (
+            <option key={l.name} value={`leader:${l.name}`}>
+              {l.name}
             </option>
           ))}
         </optgroup>

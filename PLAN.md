@@ -115,10 +115,13 @@ Pure TS + tests, no UI. Model the round and the priority cascades from fan-summa
       deck draws); moves/attacks/leader-entries/choices render as player directives. `resolveCardPlay`
       + `applyCardSteps`; wired into the UI "Play a planning card" panel (auto/you badges). Shared
       `areaLabel` moved to `engine/describeArea.ts`.
+- [x] **Named-leader special-action resolution** (`src/engine/leaderEffects.ts`, 5 tests): each
+      named leader's red action (from `leaders.ts`) encoded as ordered steps via the shared
+      `effectSteps.ts` machinery; auto-draws apply (Thufir 3, Gaius 2), moves/attacks/deploys/
+      replacements stay player-resolved. `resolveLeaderSpecial`. The card + leader step builders were
+      extracted to `effectSteps.ts` (shared by `cardEffects.ts` and `leaderEffects.ts`).
 - [ ] Tests against worked examples / rulebook edge cases
-- [ ] Remaining engine TODOs: named-leader-SPECIAL effect resolution (the red-action abilities;
-      data is in `leaders.ts`, resolution not yet encoded); coriolis storms (need the 5 storm-exempt
-      central plateaus).
+- [ ] Remaining engine TODOs: coriolis storms (need the 5 storm-exempt central plateaus).
 
 ### Phase 3 — React + TS UI
 - [x] Project scaffold (Vite 6 + React 18 + TS; `npm run dev`/`build`/`preview`). `src/ui/`
