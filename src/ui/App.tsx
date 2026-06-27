@@ -5,6 +5,7 @@ import { availability } from '../engine/spiceMustFlow';
 import { placeVehicles } from '../engine/vehiclePlacement';
 import { describeAction, actionHeadline, areaLabel } from './describeAction';
 import { sampleState } from './sampleState';
+import { StateEditor } from './StateEditor';
 
 const DIE_RESULTS: ActionResult[] = ['leadership', 'strategy', 'mentat', 'deployment', 'house'];
 const DIE_LABEL: Record<ActionResult, string> = {
@@ -98,8 +99,7 @@ function ResolvePanel({ s }: { s: GameState }) {
 }
 
 export function App() {
-  // Single demo state for the scaffold; a board-state editor replaces this later.
-  const [s] = useState<GameState>(() => sampleState());
+  const [s, setS] = useState<GameState>(() => sampleState());
   return (
     <div className="app">
       <header>
@@ -110,9 +110,10 @@ export function App() {
         <RoundPanel s={s} />
         <ResolvePanel s={s} />
         <VehiclePanel s={s} />
+        <StateEditor s={s} onChange={setS} />
       </main>
       <footer>
-        <small>Demo state. Phase 3 scaffold — board-state editor &amp; round driver next.</small>
+        <small>Round driver &amp; turn-confirm next.</small>
       </footer>
     </div>
   );
