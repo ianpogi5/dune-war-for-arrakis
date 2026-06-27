@@ -322,6 +322,58 @@ footer {
   color: #6a583c;
 }
 
+/* --- help panel --- */
+.help summary {
+  font-weight: 700;
+  font-size: 1.1rem;
+  cursor: pointer;
+  color: var(--accent);
+}
+
+.help h4 {
+  margin: 0.9rem 0 0.3rem;
+  font-size: 0.95rem;
+  color: var(--accent);
+}
+
+.help p {
+  margin: 0.4rem 0;
+  font-size: 0.95rem;
+  line-height: 1.45;
+}
+
+.help-list {
+  margin: 0.3rem 0;
+  padding-left: 1.1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  font-size: 0.95rem;
+  line-height: 1.4;
+}
+
+.badge-inline {
+  display: inline-block;
+  margin: 0 0.15rem;
+  padding: 0.02rem 0.35rem;
+  border-radius: 999px;
+  font-size: 0.66rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  vertical-align: 0.08em;
+  color: #fff;
+}
+
+.badge-inline.auto {
+  background: #2f5d50;
+}
+
+.badge-inline.you {
+  background: var(--sand);
+  color: var(--ink);
+}
+
 /* --- state editor --- */
 .editor summary {
   font-weight: 700;

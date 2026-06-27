@@ -25,6 +25,69 @@ const DIE_LABEL: Record<ActionResult, string> = {
   house: 'House',
 };
 
+const HELP_KEY = 'dwfa.helpOpen';
+
+function HelpPanel() {
+  const [open, setOpen] = useState(() => {
+    try {
+      return localStorage.getItem(HELP_KEY) !== 'closed';
+    } catch {
+      return true;
+    }
+  });
+  const onToggle = (e: React.SyntheticEvent<HTMLDetailsElement>) => {
+    const next = e.currentTarget.open;
+    setOpen(next);
+    try {
+      localStorage.setItem(HELP_KEY, next ? 'open' : 'closed');
+    } catch {
+      /* ignore */
+    }
+  };
+
+  return (
+    <details className="panel help" open={open} onToggle={onToggle}>
+      <summary>How to use this companion</summary>
+      <p>
+        You play <strong>Atreides</strong> on the physical board; this app runs the <strong>Harkonnen AI</strong>.
+        Keep it in sync with the board, and on the Harkonnen's turn it tells you what they do. The
+        <strong> physical board is always the source of truth</strong> — the app just decides Harkonnen actions.
+      </p>
+
+      <h4>First time — describe your board</h4>
+      <p>
+        Open <em>Edit game state</em> (bottom) and match your table: imperium markers, every Harkonnen &amp;
+        Atreides legion, sietch/settlement ranks, and the Harkonnen reserve. Then <em>Save</em> it under a name.
+        (What loads now is a demo game to experiment with.)
+      </p>
+
+      <h4>Each round, top to bottom</h4>
+      <ul className="help-list">
+        <li>
+          <strong>This round</strong> — the Harkonnen's dice, vehicles, and active bans. <em>Start next round</em> when done.
+        </li>
+        <li>
+          <strong>Vehicle placement</strong> — where to drop the Harkonnen harvesters/carryalls/ornithopters.
+        </li>
+        <li>
+          <strong>Resolve Harkonnen turn</strong> — roll the physical action die, tap the matching face; read the
+          directive, then <em>Confirm &amp; apply</em> (mechanical actions) or resolve it on the board (attacks).
+        </li>
+        <li>
+          <strong>Resolve a card or leader ability</strong> — pick a Harkonnen planning card / leader special to see
+          its steps. <span className="badge-inline auto">auto</span> steps the app applies;
+          <span className="badge-inline you">you</span> steps you do.
+        </li>
+        <li>
+          <strong>Coriolis Storms</strong> — for each exposed legion, roll 2 combat dice, enter swords + specials,
+          and apply the casualties.
+        </li>
+      </ul>
+      <p className="hint">Mis-tapped? <strong>↶ Undo</strong> (top right) reverts the last applied action.</p>
+    </details>
+  );
+}
+
 function RoundPanel({ s, onChange }: { s: GameState; onChange: (next: GameState) => void }) {
   const avail = availability(s.spice.markers);
   const won = s.tracks.supremacy >= SUPREMACY_WIN;
@@ -41,6 +104,7 @@ function RoundPanel({ s, onChange }: { s: GameState; onChange: (next: GameState)
   return (
     <section className="panel">
       <h2>This round</h2>
+      <p className="hint">What the Harkonnen get this round, from the Spice Must Flow markers.</p>
       {won && <div className="win-banner">Harkonnen victory — supremacy {SUPREMACY_WIN} reached.</div>}
       <dl className="kv">
         <dt>Round</dt>
@@ -83,6 +147,7 @@ function VehiclePanel({ s }: { s: GameState }) {
   return (
     <section className="panel">
       <h2>Vehicle placement</h2>
+      <p className="hint">Where to place the Harkonnen vehicles on the board this round.</p>
       <p>
         <strong>Harvesters:</strong>{' '}
         {placement.harvesters.length ? placement.harvesters.map(areaLabel).join(', ') : 'none'}
@@ -352,6 +417,7 @@ export function App() {
         </div>
       </header>
       <main>
+        <HelpPanel />
         <RoundPanel s={s} onChange={commit} />
         <ResolvePanel s={s} onApply={commit} />
         <CardPanel s={s} onApply={commit} />
