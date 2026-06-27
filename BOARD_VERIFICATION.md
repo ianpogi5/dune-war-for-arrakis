@@ -448,7 +448,7 @@ s8_1:    s8_3 ✅, s4_13 ✅, s4_14 ✅                   # s8_1↔s8_2 & s8_1�
 s8_2:    splintered_rock ✅, hagga_basin ✅, wind_pass ✅, s8_4 ✅   # unnamed MTN; +s8_1 RED; +shield_wall_2 🟡(red?)
 s8_3:    bight_of_the_cliff ✅, s4_12 ✅, s4_13 ✅, s8_1 ✅, s8_4 ✅, s3_3 ✅, s7_1 ✅   # COMPLETE
 s8_4:    s8_3 ✅, s8_2 ✅, wind_pass ✅                 # NOT splintered_rock
-arsunt:        shield_wall_2 ✅, s4_16 ✅, hagga_basin ✅, carthag 🟡, broken_land 🟡   # city I (carthag/broken_land → confirm in s5)
+arsunt:        shield_wall_2 ✅, s4_16 ✅, hagga_basin ✅, broken_land ✅, carthag 🟡   # city I (carthag → confirm)
 hagga_basin:   arsunt ✅, carthag ✅, s5_1 ✅, s5_2 ✅, splintered_rock ✅, s8_2 ✅, shield_wall_2 ✅   # city I; NOT north_pole / imperial_basin(air zone)
 splintered_rock: wind_pass ✅, s8_2 ✅, hagga_basin ✅, s5_2 ✅, false_wall_east 🟡, false_wall_west 🟡   # NOT s8_4, NOT north_pole, NOT hole_in_the_rock
 shield_wall_2: arsunt ✅, hagga_basin ✅, s4_14 ✅, s4_15 ✅, s4_16 ✅   # W side (s8_1) = RED impassable §4
@@ -486,7 +486,7 @@ arrakeen:       carthag ✅, imperial_basin ✅, broken_land ✅, rimwall_west �
 imperial_basin: arrakeen ✅, hole_in_the_rock ✅, rimwall_west ✅, s5_1 ✅, s5_4 ✅, s5_5 ✅   # COMPLETE (NOT carthag/hagga_basin)
 hole_in_the_rock: imperial_basin ✅, s5_1 ✅, s5_2 ✅, s5_3 ✅, s5_4 ✅   # ✅ COMPLETE (embedded in s5)
 rimwall_west:   broken_land ✅, arrakeen ✅, imperial_basin ✅, s5_5 ✅, s1_4 ✅, s1_5 ✅   # ✅ COMPLETE; s1_4/s1_5 = RED impassable arc (§4)
-broken_land:    carthag ✅, arrakeen ✅, rimwall_west ✅, s4_16 ✅, arsunt 🟡   # + s4_11 RED §4, + s1_3 RED §4(?)
+broken_land:    carthag ✅, arrakeen ✅, rimwall_west ✅, s4_16 ✅, arsunt ✅   # white(5) + s4_11, s1_3 RED §4 = 7; user says 8 total — 8th TBD
 shield_wall_1:  gara_kulon ✅, s5_9 ✅, s5_8 ✅, s1_11 ✅, <an s5 minor erg> ✅   # + s5_6 = RED impassable (§4)
 gara_kulon:     s1_11 ✅, s1_12 ✅, s1_14 ✅, s1_15 ✅, s1_16 ✅, shield_wall_1 ✅, s5_9 ✅
 ```
