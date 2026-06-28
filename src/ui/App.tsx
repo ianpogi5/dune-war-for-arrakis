@@ -26,6 +26,10 @@ import { sampleState } from './sampleState';
 import { newGameState } from '../engine/newGame';
 import { StateEditor } from './StateEditor';
 import { GamesPanel } from './GamesPanel';
+import { BoardMap } from './BoardMap';
+import { AREA_IDS } from '../engine/board';
+
+const SORTED_AREA_IDS = [...AREA_IDS].sort((a, b) => areaLabel(a).localeCompare(areaLabel(b)));
 import { loadState, saveState, clearState, exportState } from './persistence';
 
 const DIE_RESULTS: ActionResult[] = ['leadership', 'strategy', 'mentat', 'deployment', 'house'];
@@ -381,6 +385,40 @@ function StormPanel({ s, onApply }: { s: GameState; onApply: (next: GameState) =
 }
 
 // ---------------------------------------------------------------------------
+// Board map: a schematic reference of every area, overlaid with the game state.
+// ---------------------------------------------------------------------------
+
+function BoardMapPanel({ s }: { s: GameState }) {
+  const [picked, setPicked] = useState<string | null>(null);
+  return (
+    <details className="panel">
+      <summary className="map-summary">Board map</summary>
+      <p className="hint">Every area, colored by terrain, with your pieces overlaid. Click a dot (or pick below) to identify an area and where it sits.</p>
+      <label className="map-pick">
+        Find an area
+        <select value={picked ?? ''} onChange={(e) => setPicked(e.target.value || null)}>
+          <option value="">— select —</option>
+          {SORTED_AREA_IDS.map((id) => (
+            <option key={id} value={id}>
+              {areaLabel(id)}
+            </option>
+          ))}
+        </select>
+      </label>
+      {picked && <p className="map-caption">{areaLabel(picked)}</p>}
+      <BoardMap state={s} highlight={picked} onSelect={setPicked} />
+      <div className="map-legend">
+        <span><i className="lg-h" /> Harkonnen</span>
+        <span><i className="lg-a" /> Atreides</span>
+        <span><i className="lg-si" /> Sietch</span>
+        <span><i className="lg-st" /> Settlement</span>
+        <span><i className="lg-tgt" /> Target sietch</span>
+      </div>
+    </details>
+  );
+}
+
+// ---------------------------------------------------------------------------
 // Round walkthrough: a phase tracker that explains the current step.
 // ---------------------------------------------------------------------------
 
@@ -667,6 +705,7 @@ export function App() {
       <main>
         <HelpPanel />
         <GamesPanel s={s} onReset={reset} onNewGame={startNewGame} onExport={exportGame} onImport={loadGame} />
+        <BoardMapPanel s={s} />
         <StateEditor s={s} onChange={setS} />
         <RoundPanel s={s} onChange={commit} />
         <PhasePanel s={s} onChange={setS} />

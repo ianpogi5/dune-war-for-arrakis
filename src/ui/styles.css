@@ -700,3 +700,67 @@ label.mini.check input {
   color: #6a583c;
   font-weight: 600;
 }
+
+/* --- board map --- */
+.map-summary {
+  font-weight: 700;
+  font-size: 1.1rem;
+  cursor: pointer;
+  color: var(--accent);
+}
+.board-map {
+  width: 100%;
+  height: auto;
+  display: block;
+  margin: 0.6rem 0;
+  border-radius: 10px;
+  border: 1px solid var(--line);
+  background: #f3e2bd;
+}
+.map-label {
+  pointer-events: none;
+  paint-order: stroke;
+  stroke: #f3e2bd;
+  stroke-width: 1.4px;
+}
+.map-area:hover circle {
+  stroke: var(--accent);
+  stroke-width: 2;
+}
+.map-pick {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  font-size: 0.8rem;
+  color: #6a583c;
+  max-width: 22rem;
+}
+.map-caption {
+  margin: 0.4rem 0 0;
+  font-weight: 700;
+  color: var(--accent);
+}
+.map-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  margin-top: 0.5rem;
+  font-size: 0.8rem;
+  color: #5a4a32;
+}
+.map-legend span {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+.map-legend i {
+  width: 0.8rem;
+  height: 0.8rem;
+  border-radius: 50%;
+  display: inline-block;
+}
+.map-legend .lg-h { background: #b3261e; }
+.map-legend .lg-a { background: #2f7d3a; }
+.map-legend .lg-si { background: #2f5d50; border-radius: 0; clip-path: polygon(50% 0, 100% 100%, 0 100%); }
+.map-legend .lg-st { background: #8a2c1f; border-radius: 2px; }
+.map-legend .lg-tgt { background: transparent; border: 2px solid #d4a017; }
