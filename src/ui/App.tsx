@@ -650,7 +650,7 @@ function PhasePanel({ s, onChange }: { s: GameState; onChange: (next: GameState)
         ))}
       </ol>
       <p className="directive-text">{PHASE_GUIDE[phase]}</p>
-      <div className="directive-actions">
+      <div className="phase-nav">
         <button className="die" disabled={!prev} onClick={() => prev && onChange({ ...s, phase: prev })}>
           ← {prev ? PHASE_LABEL[prev] : 'Back'}
         </button>
