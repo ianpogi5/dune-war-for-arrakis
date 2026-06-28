@@ -6,7 +6,7 @@
 // off the physical board. Where several unnamed areas ring the same landmark and would collide, we
 // append the id as a disambiguator so dropdown options stay distinct.
 
-import { AREAS, ADJACENCY } from './board';
+import { AREAS, ADJACENCY, AIR_ZONES } from './board';
 import type { Area } from './board';
 
 function terrainWord(a: Area): string {
@@ -81,6 +81,23 @@ export function areaLabel(id: string): string {
   const a = AREAS[id];
   if (!a) return id;
   return a.name ?? LABELS[id] ?? id;
+}
+
+/**
+ * Human label for an air zone (carryall/ornithopter location) — named after the areas it covers,
+ * so "az3" reads as e.g. "Air zone over Hagga Basin & …". Falls back to the id if unknown.
+ */
+export function airZoneLabel(id: string): string {
+  const az = AIR_ZONES.find((z) => z.id === id);
+  if (!az) return id;
+  const named = [...new Set(az.areas.filter((a) => AREAS[a]?.name).map((a) => AREAS[a].name as string))];
+  if (named.length) return `Air zone over ${named.slice(0, 3).join(' & ')}`;
+  // No named member — anchor to the nearby named landmarks instead.
+  const landmarks: string[] = [];
+  for (const a of az.areas) {
+    for (const n of nearestNamed(a).names) if (!landmarks.includes(n)) landmarks.push(n);
+  }
+  return landmarks.length ? `Air zone near ${landmarks.slice(0, 2).join(' & ')}` : id;
 }
 
 /**

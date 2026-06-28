@@ -28,7 +28,8 @@ import { StateEditor } from './StateEditor';
 import { GamesPanel } from './GamesPanel';
 import { BoardMap } from './BoardMap';
 import { AREA_IDS, AREAS } from '../engine/board';
-import { neighbors as boardNeighbors } from '../engine/graph';
+import { neighbors as boardNeighbors, airZonesOf } from '../engine/graph';
+import { airZoneLabel } from '../engine/describeArea';
 import {
   canPlaceWormsign,
   canPlaceSandworm,
@@ -197,11 +198,11 @@ function VehiclePanel({ s }: { s: GameState }) {
         {placement.harvesters.length ? placement.harvesters.map(areaLabel).join(', ') : 'none'}
       </p>
       <p>
-        <strong>Carryalls:</strong> {placement.carryalls.length ? placement.carryalls.join(', ') : 'none'}
+        <strong>Carryalls:</strong> {placement.carryalls.length ? placement.carryalls.map(airZoneLabel).join('; ') : 'none'}
       </p>
       <p>
         <strong>Ornithopters:</strong>{' '}
-        {placement.ornithopters.length ? placement.ornithopters.join(', ') : 'none'}
+        {placement.ornithopters.length ? placement.ornithopters.map(airZoneLabel).join('; ') : 'none'}
       </p>
     </section>
   );
@@ -462,6 +463,7 @@ function AreaInfoCard({ id, s }: { id: string | null; s: GameState }) {
   const hasWorm = s.wormsigns.some((w) => w.area === id);
   const hasSandworm = s.sandworms.some((w) => w.area === id);
   const neighbors = boardNeighbors(id).map(areaLabel).sort();
+  const airZones = airZonesOf(id).map((z) => airZoneLabel(z.id));
 
   return (
     <div className="area-card">
@@ -485,6 +487,7 @@ function AreaInfoCard({ id, s }: { id: string | null; s: GameState }) {
         </div>
       )}
       <div className="area-card-adj"><b>Adjacent:</b> {neighbors.join(', ')}</div>
+      {airZones.length > 0 && <div className="area-card-adj"><b>Air zones:</b> {airZones.join('; ')}</div>}
     </div>
   );
 }
