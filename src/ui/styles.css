@@ -862,12 +862,39 @@ label.mini.check input {
 .board-map {
   touch-action: none; /* we handle pan/pinch ourselves */
 }
+.map-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 0.4rem;
+}
 .map-zoom {
   display: flex;
   flex-direction: row;
-  justify-content: flex-end;
   gap: 0.25rem;
-  margin-bottom: 0.4rem;
+}
+.map-colorby {
+  display: inline-flex;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  overflow: hidden;
+}
+.map-colorby button {
+  border: none;
+  background: rgba(255, 255, 255, 0.92);
+  color: var(--ink);
+  padding: 0.35rem 0.7rem;
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+.map-colorby button + button {
+  border-left: 1px solid var(--line);
+}
+.map-colorby button.on {
+  background: var(--accent);
+  color: #fff;
 }
 .map-zoom button {
   width: 2rem;

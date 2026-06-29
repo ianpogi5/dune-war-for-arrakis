@@ -37,14 +37,84 @@ const xy = (id: string): [number, number] => {
   return p ? [p[0] * W, p[1] * H] : [0, 0];
 };
 
+const sectorOf = (id: string): string => AREAS[id]?.sector ?? 'np';
+
+// A distinct, desert-toned hue per sector for the "by sector" view (radial-wedge clarity).
+const SECTOR_FILL: Record<string, string> = {
+  s1: '#cf6a4a', s2: '#d9913f', s3: '#c9b13b', s4: '#7fa64e',
+  s5: '#4f9e86', s6: '#4e86b0', s7: '#7a6fb0', s8: '#b05f97', np: '#9c8550',
+};
+
 // Voronoi tessellation of the area centres — turns our captured points into filled, contiguous
-// terrain cells that tile the board (our own generated geometry, no third-party art). Static, so
-// it's computed once at module load rather than per render.
-const CELLS: { id: string; d: string; fill: string }[] = (() => {
+// cells that tile the board (our own generated geometry, no third-party art). We also derive the
+// sector boundaries (shared edges between cells of different sectors) and per-sector labels so the
+// board's radial sector structure reads clearly. Static → computed once at module load.
+const GEO = (() => {
   const ids = Object.keys(AREA_POSITIONS);
-  const delaunay = Delaunay.from(ids.map(xy));
+  const pts = ids.map(xy);
+  const delaunay = Delaunay.from(pts);
   const voronoi = delaunay.voronoi([0, 0, W, H]);
-  return ids.map((id, i) => ({ id, d: voronoi.renderCell(i), fill: fillFor(id) }));
+  const cells = ids.map((id, i) => ({
+    id,
+    d: voronoi.renderCell(i),
+    terrainFill: fillFor(id),
+    sector: sectorOf(id),
+  }));
+
+  // Centre of the radial layout + each sector's centroid (for labels and inner/outer detection).
+  const C: [number, number] = [
+    pts.reduce((t, p) => t + p[0], 0) / pts.length,
+    pts.reduce((t, p) => t + p[1], 0) / pts.length,
+  ];
+  const bySector = new Map<string, [number, number][]>();
+  cells.forEach((cell, i) => {
+    (bySector.get(cell.sector) ?? bySector.set(cell.sector, []).get(cell.sector)!).push(pts[i]);
+  });
+  const centroid = (ps: [number, number][]): [number, number] => [
+    ps.reduce((t, p) => t + p[0], 0) / ps.length,
+    ps.reduce((t, p) => t + p[1], 0) / ps.length,
+  ];
+  const meanRadius = (ps: [number, number][]) =>
+    ps.reduce((t, p) => t + Math.hypot(p[0] - C[0], p[1] - C[1]), 0) / ps.length;
+  // Each non-polar sector → a quadrant by its centroid; within a quadrant the nearer-to-centre
+  // sector is "Inner", the farther "Outer" (so the two sectors per quadrant never collide).
+  const info = [...bySector.entries()].map(([s, ps]) => {
+    const [cx, cy] = centroid(ps);
+    const quad = s === 'np' ? '' : `${cy < C[1] ? 'N' : 'S'}${cx < C[0] ? 'W' : 'E'}`;
+    return { s, x: cx, y: cy, quad, r: meanRadius(ps) };
+  });
+  const byQuad = new Map<string, typeof info>();
+  for (const it of info) if (it.quad) (byQuad.get(it.quad) ?? byQuad.set(it.quad, []).get(it.quad)!).push(it);
+  for (const arr of byQuad.values()) arr.sort((a, b) => a.r - b.r);
+  const labels = info.map((it) => ({
+    s: it.s,
+    x: it.x,
+    y: it.y,
+    text: it.s === 'np' ? 'N. Pole' : `${byQuad.get(it.quad)!.indexOf(it) === 0 ? 'Inner' : 'Outer'} ${it.quad}`,
+  }));
+
+  // Sector boundaries: a Voronoi edge shared by two cells whose sectors differ. An edge endpoint
+  // that lies on it is equidistant from both sites (it's a circumcentre of a triangle on edge i–j).
+  const equidist = (p: [number, number], a: [number, number], b: [number, number]) =>
+    Math.abs(Math.hypot(p[0] - a[0], p[1] - a[1]) - Math.hypot(p[0] - b[0], p[1] - b[1])) < 0.5;
+  const segs: [number, number, number, number][] = [];
+  for (let i = 0; i < ids.length; i++) {
+    const poly = voronoi.cellPolygon(i);
+    if (!poly) continue;
+    for (const j of delaunay.neighbors(i)) {
+      if (j <= i || cells[i].sector === cells[j].sector) continue;
+      for (let k = 0; k < poly.length - 1; k++) {
+        const a = poly[k] as [number, number];
+        const b = poly[k + 1] as [number, number];
+        if (equidist(a, pts[i], pts[j]) && equidist(b, pts[i], pts[j])) {
+          segs.push([a[0], a[1], b[0], b[1]]);
+          break;
+        }
+      }
+    }
+  }
+
+  return { cells, segs, labels, C };
 })();
 
 const clamp = (n: number, lo: number, hi: number) => Math.max(lo, Math.min(hi, n));
@@ -90,6 +160,8 @@ export function BoardMap({ highlight, focus, onSelect, onHover, state, picking, 
   // Area to emphasize STRONGLY (veil + label) right after a locate/find — cleared on first
   // interaction so it doesn't get in the way while the player then explores the map.
   const [emphasis, setEmphasis] = useState<string | null>(null);
+  // Fill cells by terrain (default) or by sector (radial-wedge clarity).
+  const [colorBy, setColorBy] = useState<'terrain' | 'sector'>('terrain');
   const svgRef = useRef<SVGSVGElement>(null);
 
   // Zoom & pan the located area to the centre of the viewport so it's unmistakable.
@@ -204,10 +276,20 @@ export function BoardMap({ highlight, focus, onSelect, onHover, state, picking, 
 
   return (
     <div className="map-wrap">
-      <div className="map-zoom">
-        <button type="button" onClick={() => zoomBtn(1.4)} aria-label="Zoom in">+</button>
-        <button type="button" onClick={() => zoomBtn(1 / 1.4)} aria-label="Zoom out">−</button>
-        <button type="button" onClick={reset} aria-label="Reset zoom">⟲</button>
+      <div className="map-toolbar">
+        <div className="map-colorby" role="group" aria-label="Colour cells by">
+          <button type="button" className={colorBy === 'terrain' ? 'on' : ''} onClick={() => setColorBy('terrain')}>
+            Terrain
+          </button>
+          <button type="button" className={colorBy === 'sector' ? 'on' : ''} onClick={() => setColorBy('sector')}>
+            Sectors
+          </button>
+        </div>
+        <div className="map-zoom">
+          <button type="button" onClick={() => zoomBtn(1.4)} aria-label="Zoom in">+</button>
+          <button type="button" onClick={() => zoomBtn(1 / 1.4)} aria-label="Zoom out">−</button>
+          <button type="button" onClick={reset} aria-label="Reset zoom">⟲</button>
+        </div>
       </div>
       <svg
         ref={svgRef}
@@ -223,11 +305,12 @@ export function BoardMap({ highlight, focus, onSelect, onHover, state, picking, 
       >
         <rect x={0} y={0} width={W} height={H} rx={10} fill="#f3e2bd" stroke="#d8c9aa" />
         <g transform={`translate(${view.tx} ${view.ty}) scale(${view.k})`}>
-          {/* Terrain cells (Voronoi of the area centres) — the filled, contiguous base map. Clicking
-              anywhere in a cell selects that area, so the hit targets are large and easy to tap. */}
-          {CELLS.map(({ id, d, fill }) => {
+          {/* Voronoi cells of the area centres — the filled, contiguous base map. Clicking anywhere
+              in a cell selects that area, so the hit targets are large and easy to tap. */}
+          {GEO.cells.map(({ id, d, terrainFill, sector }) => {
             const on = hover === id || highlight === id;
             const ok = !selectable || selectable(id);
+            const fill = colorBy === 'sector' ? SECTOR_FILL[sector] : terrainFill;
             return (
               <path
                 key={`c-${id}`}
@@ -235,9 +318,9 @@ export function BoardMap({ highlight, focus, onSelect, onHover, state, picking, 
                 d={d}
                 fill={fill}
                 stroke={on ? '#7a1d12' : '#9c8550'}
-                strokeWidth={on ? 2.4 : 0.8}
+                strokeWidth={on ? 2.4 : 0.6}
                 vectorEffect="non-scaling-stroke"
-                fillOpacity={on ? 1 : 0.92}
+                fillOpacity={on ? 1 : colorBy === 'sector' ? 0.82 : 0.92}
                 opacity={ok ? 1 : 0.2}
                 style={ok ? undefined : { pointerEvents: 'none' }}
                 onClick={() => ok && tap(id)}
@@ -246,6 +329,43 @@ export function BoardMap({ highlight, focus, onSelect, onHover, state, picking, 
               />
             );
           })}
+
+          {/* Sector boundaries (bold) — the board's radial wedge structure, drawn from our own
+              cell geometry so the 8 sectors read clearly in either colour mode. */}
+          {GEO.segs.map(([x1, y1, x2, y2], i) => (
+            <line
+              key={`b-${i}`}
+              x1={x1}
+              y1={y1}
+              x2={x2}
+              y2={y2}
+              stroke="#3a2a18"
+              strokeWidth={2.4}
+              strokeLinecap="round"
+              vectorEffect="non-scaling-stroke"
+              pointerEvents="none"
+            />
+          ))}
+
+          {/* Sector labels at each sector's centroid */}
+          {GEO.labels.map(({ s, x, y, text }) => (
+            <text
+              key={`sl-${s}`}
+              x={x}
+              y={y}
+              fontSize={11 / view.k}
+              fontWeight={800}
+              fill="#2b2117"
+              stroke="#fff"
+              strokeWidth={3 / view.k}
+              paintOrder="stroke"
+              textAnchor="middle"
+              opacity={0.85}
+              pointerEvents="none"
+            >
+              {text}
+            </text>
+          ))}
 
           {/* Target sietch halo (under markers) */}
           {target && AREA_POSITIONS[target] && (() => {
