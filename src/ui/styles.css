@@ -863,13 +863,11 @@ label.mini.check input {
   touch-action: none; /* we handle pan/pinch ourselves */
 }
 .map-zoom {
-  position: absolute;
-  top: 0.5rem;
-  right: 0.5rem;
-  z-index: 2;
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
+  justify-content: flex-end;
   gap: 0.25rem;
+  margin-bottom: 0.4rem;
 }
 .map-zoom button {
   width: 2rem;

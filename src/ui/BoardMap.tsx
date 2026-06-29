@@ -5,10 +5,11 @@
 // Pan & zoom (dependency-free, Pointer Events): one-finger drag pans, two-finger pinch zooms,
 // wheel zooms on desktop, and +/−/reset buttons work everywhere — so dots are tappable on phones.
 
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { AREAS } from '../engine/board';
 import type { Terrain } from '../engine/board';
 import { AREA_POSITIONS, BOARD_ASPECT } from '../engine/boardPositions';
+import { areaLabel } from '../engine/describeArea';
 import type { GameState } from '../engine/state';
 
 const W = 1000;
@@ -53,9 +54,13 @@ function clampView(v: View): View {
   };
 }
 
+const FOCUS_ZOOM = 3.2; // how far to zoom in when focusing a located area
+
 export interface BoardMapProps {
-  /** Area to emphasize (gold pulse). */
+  /** Area to emphasize (gold pulse + label). */
   highlight?: string | null;
+  /** One-shot request to zoom/pan the view to an area (nonce makes repeat locates re-fire). */
+  focus?: { id: string; nonce: number } | null;
   /** Called when an area dot is clicked (tap, not drag). */
   onSelect?: (id: string) => void;
   /** Called as the pointer enters/leaves a dot (id or null). Drives the info card. */
@@ -68,10 +73,24 @@ export interface BoardMapProps {
   selectable?: (id: string) => boolean;
 }
 
-export function BoardMap({ highlight, onSelect, onHover, state, picking, selectable }: BoardMapProps) {
+export function BoardMap({ highlight, focus, onSelect, onHover, state, picking, selectable }: BoardMapProps) {
   const [hover, setHover] = useState<string | null>(null);
   const [view, setView] = useState<View>({ k: 1, tx: 0, ty: 0 });
+  // Area to emphasize STRONGLY (veil + label) right after a locate/find — cleared on first
+  // interaction so it doesn't get in the way while the player then explores the map.
+  const [emphasis, setEmphasis] = useState<string | null>(null);
   const svgRef = useRef<SVGSVGElement>(null);
+
+  // Zoom & pan the located area to the centre of the viewport so it's unmistakable.
+  useEffect(() => {
+    if (!focus) return;
+    const p = AREA_POSITIONS[focus.id];
+    if (!p) return;
+    const k = FOCUS_ZOOM;
+    setView(clampView({ k, tx: W / 2 - k * (p[0] * W), ty: H / 2 - k * (p[1] * H) }));
+    setEmphasis(focus.id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [focus?.nonce]);
 
   // Active pointers and gesture bookkeeping (refs — no re-render during a drag).
   const pointers = useRef<Map<number, { x: number; y: number }>>(new Map());
@@ -99,6 +118,7 @@ export function BoardMap({ highlight, onSelect, onHover, state, picking, selecta
     });
 
   const onPointerDown = (e: React.PointerEvent) => {
+    setEmphasis(null); // the player is interacting now — drop the strong locate overlay
     (e.target as Element).setPointerCapture?.(e.pointerId);
     pointers.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
     moved.current = 0;
@@ -263,14 +283,53 @@ export function BoardMap({ highlight, onSelect, onHover, state, picking, selecta
             return <circle key={`w-${id}`} cx={cx + 10} cy={cy - 3} r={3} fill="#5b3b1a" pointerEvents="none" />;
           })}
 
-          {/* Highlight pulse (selected/found area) */}
-          {highlight && AREA_POSITIONS[highlight] && (() => {
+          {/* Light highlight ring for a plainly selected area (constant on-screen size at any zoom) */}
+          {highlight && highlight !== emphasis && AREA_POSITIONS[highlight] && (() => {
             const [cx, cy] = xy(highlight);
+            const s = 1 / view.k;
             return (
-              <circle cx={cx} cy={cy} r={13} fill="none" stroke="#d4a017" strokeWidth={3} pointerEvents="none">
-                <animate attributeName="r" values="11;17;11" dur="1.4s" repeatCount="indefinite" />
+              <circle cx={cx} cy={cy} r={13 * s} fill="none" stroke="#d4a017" strokeWidth={3 * s} pointerEvents="none">
+                <animate attributeName="r" values={`${11 * s};${17 * s};${11 * s}`} dur="1.4s" repeatCount="indefinite" />
                 <animate attributeName="opacity" values="1;0.3;1" dur="1.4s" repeatCount="indefinite" />
               </circle>
+            );
+          })()}
+
+          {/* Strong locate emphasis: dim the rest of the board, a bright pulsing ring, and a label,
+              so a just-located area is unmistakable even on a crowded board. Cleared on interaction. */}
+          {emphasis && AREA_POSITIONS[emphasis] && (() => {
+            const [cx, cy] = xy(emphasis);
+            const s = 1 / view.k; // keep ring/label a constant on-screen size at any zoom
+            return (
+              <g pointerEvents="none">
+                <defs>
+                  <mask id="focus-mask">
+                    <rect x={0} y={0} width={W} height={H} fill="#fff" />
+                    <circle cx={cx} cy={cy} r={40 * s} fill="#000" />
+                  </mask>
+                </defs>
+                <rect x={0} y={0} width={W} height={H} fill="#1c160d" opacity={0.38} mask="url(#focus-mask)" />
+                <circle cx={cx} cy={cy} r={20 * s} fill="none" stroke="#fff" strokeWidth={4 * s} opacity={0.9}>
+                  <animate attributeName="r" values={`${14 * s};${24 * s};${14 * s}`} dur="1.3s" repeatCount="indefinite" />
+                  <animate attributeName="opacity" values="1;0.25;1" dur="1.3s" repeatCount="indefinite" />
+                </circle>
+                <circle cx={cx} cy={cy} r={20 * s} fill="none" stroke="#d4a017" strokeWidth={2.4 * s}>
+                  <animate attributeName="r" values={`${14 * s};${24 * s};${14 * s}`} dur="1.3s" repeatCount="indefinite" />
+                </circle>
+                <text
+                  x={cx}
+                  y={cy - 24 * s}
+                  fontSize={13 * s}
+                  fontWeight={700}
+                  fill="#3a2a12"
+                  stroke="#fff"
+                  strokeWidth={3 * s}
+                  paintOrder="stroke"
+                  textAnchor="middle"
+                >
+                  {areaLabel(emphasis)}
+                </text>
+              </g>
             );
           })()}
         </g>

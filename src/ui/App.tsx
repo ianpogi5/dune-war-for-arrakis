@@ -642,6 +642,14 @@ function BoardMapPanel({
 }) {
   const [picked, setPicked] = useState<string | null>(null);
   const [hovered, setHovered] = useState<string | null>(null);
+  // One-shot request to zoom/pan the map onto an area (nonce re-fires identical locates).
+  const [focus, setFocus] = useState<{ id: string; nonce: number } | null>(null);
+
+  // Select an area, pulse it, and zoom/centre the map on it.
+  const focusArea = (id: string | null) => {
+    setPicked(id);
+    if (id) setFocus({ id, nonce: Date.now() });
+  };
 
   // When the editor requests a pick, open the map and scroll it into view.
   useEffect(() => {
@@ -655,12 +663,13 @@ function BoardMapPanel({
   // highlight prop pulses it). Then clear the one-shot request.
   useEffect(() => {
     if (!locate) return;
-    setPicked(locate);
+    focusArea(locate);
     if (panelRef.current) {
       panelRef.current.open = true;
       panelRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
     clearLocate();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [locate, clearLocate, panelRef]);
 
   // The area currently held by the pick target (to highlight while picking), and a description.
@@ -728,7 +737,7 @@ function BoardMapPanel({
 
       <label className="map-pick">
         Find an area
-        <select value={picked ?? ''} onChange={(e) => setPicked(e.target.value || null)}>
+        <select value={picked ?? ''} onChange={(e) => focusArea(e.target.value || null)}>
           <option value="">— select —</option>
           {SORTED_AREA_IDS.map((id) => (
             <option key={id} value={id}>
@@ -741,6 +750,7 @@ function BoardMapPanel({
       <BoardMap
         state={s}
         highlight={pick ? pickArea : picked}
+        focus={focus}
         onSelect={onMapSelect}
         onHover={setHovered}
         picking={!!pick}
