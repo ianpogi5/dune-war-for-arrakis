@@ -43,7 +43,7 @@ const DISPLAY_POS: Record<string, readonly [number, number]> = {
   splintered_rock: [0.401, 0.441], // off the pole — Wind Pass is the s8 area adjacent to N. Pole
   s2_6: [0.7565, 0.837], // pull in off the bottom edge
   s5_5: [0.67, 0.39], // fronts the NE arc (borders s1_5/s1_7) while still touching s5_4 and imperial_basin
-  imperial_basin: [0.59, 0.38], // pulled off s5_7 (not adjacent) and clear of the s5_5↔s5_4 edge
+  imperial_basin: [0.55, 0.335], // up off the s5_4↔s5_5 edge (lengthens it ~46px) and clear of s5_7
 };
 const xy = (id: string): [number, number] => {
   const p = DISPLAY_POS[id] ?? AREA_POSITIONS[id];
@@ -145,14 +145,18 @@ const GEO = (() => {
   // point in the region belongs to the nearest area IN that sector (no orphaned strips), cells fill
   // the whole region, and cross-sector-adjacent areas meet along the divider lines.
   const cells: { id: string; d: string; terrainFill: string; sector: string }[] = [];
+  const cellPoly: Record<string, [number, number][]> = {};
   for (const [s, as] of sectorAreas) {
     if (s === 'np') continue;
     const seeds = as.map(xy);
     const pad: [number, number][] = seeds.length >= 2 ? seeds : [seeds[0], [seeds[0][0] + 0.01, seeds[0][1]]];
     const vor = Delaunay.from(pad).voronoi([0, 0, W, H]);
     as.forEach((id, i) => {
-      const d = vor.renderCell(Math.min(i, pad.length - 1));
+      const j = Math.min(i, pad.length - 1);
+      const d = vor.renderCell(j);
       if (d) cells.push({ id, d, terrainFill: fillFor(id), sector: s });
+      const poly = vor.cellPolygon(j);
+      if (poly) cellPoly[id] = poly as [number, number][];
     });
   }
 
@@ -187,53 +191,73 @@ const GEO = (() => {
     return { id: z.id, x, y };
   });
 
-  // Impassable borders: a bold bar across the border between the two areas, perpendicular to the
-  // line joining them. The CENTRE sits where their cells actually meet on the map: the midpoint for
-  // same-sector neighbours, or the point where the segment crosses the dividing cross/arc for
-  // areas in different sectors (where the divider is their real shared edge).
-  const impassable = IMPASSABLE.map(([a, b]) => {
-    const pa = xy(a);
-    const pb = xy(b);
-    const qa = `${pa[1] < C[1] ? 'N' : 'S'}${pa[0] < C[0] ? 'W' : 'E'}`;
-    let cx = (pa[0] + pb[0]) / 2;
-    let cy = (pa[1] + pb[1]) / 2;
-    if (sectorOf(a) !== sectorOf(b)) {
-      if ((pa[1] < C[1]) !== (pb[1] < C[1])) {
-        const t = (C[1] - pa[1]) / (pb[1] - pa[1]); // cross the horizontal axis
-        cx = pa[0] + t * (pb[0] - pa[0]);
-        cy = C[1];
-      } else if ((pa[0] < C[0]) !== (pb[0] < C[0])) {
-        const t = (C[0] - pa[0]) / (pb[0] - pa[0]); // cross the vertical axis
-        cx = C[0];
-        cy = pa[1] + t * (pb[1] - pa[1]);
-      } else {
-        // same quadrant, inner vs outer → where the segment crosses the quadrant arc
-        const R = r1[qa] ?? Math.hypot(cx - C[0], cy - C[1]);
-        const ex = pb[0] - pa[0];
-        const ey = pb[1] - pa[1];
-        const fx = pa[0] - C[0];
-        const fy = pa[1] - C[1];
-        const A = ex * ex + ey * ey;
-        const B = 2 * (fx * ex + fy * ey);
-        const Cc = fx * fx + fy * fy - R * R;
-        const disc = B * B - 4 * A * Cc;
-        if (disc >= 0) {
-          const s = Math.sqrt(disc);
-          const t = [(-B + s) / (2 * A), (-B - s) / (2 * A)].find((v) => v >= 0 && v <= 1);
-          if (t !== undefined) {
-            cx = pa[0] + t * ex;
-            cy = pa[1] + t * ey;
-          }
-        }
+  // Impassable borders: a bold mark drawn ALONG the real shared edge between the two areas.
+  //  • different sectors → the edge is a divider, so we trace the divider itself: an ARC segment on
+  //    the quadrant arc (inner vs outer), or a straight segment on the cross axis (across a quadrant).
+  //  • same sector → the edge is the Voronoi edge they share; we find it on cell a's polygon.
+  // Each returns an SVG path `d` (a line "M..L.." or an arc "M..A..").
+  const HALF = 26; // half-length of the mark, in board units
+  const seg = (x1: number, y1: number, x2: number, y2: number) => `M${x1},${y1} L${x2},${y2}`;
+  // shared Voronoi edge of same-sector neighbours a,b: the polygon edge of a whose endpoints are
+  // equidistant to a and b. Centre the mark on it, capped to HALF so big cells don't get a huge bar.
+  const sharedEdge = (a: string, b: string): string | null => {
+    const poly = cellPoly[a];
+    if (!poly) return null;
+    const [ax, ay] = xy(a), [bx, by] = xy(b);
+    const eq = (p: [number, number]) => Math.abs(Math.hypot(p[0] - ax, p[1] - ay) - Math.hypot(p[0] - bx, p[1] - by));
+    for (let i = 0; i < poly.length - 1; i++) {
+      const p = poly[i], q = poly[i + 1];
+      if (eq(p) < 2 && eq(q) < 2) {
+        const mx = (p[0] + q[0]) / 2, my = (p[1] + q[1]) / 2;
+        const L = Math.hypot(q[0] - p[0], q[1] - p[1]) || 1;
+        const h = Math.min(L / 2, HALF);
+        const ux = ((q[0] - p[0]) / L) * h, uy = ((q[1] - p[1]) / L) * h;
+        return seg(mx - ux, my - uy, mx + ux, my + uy);
       }
     }
-    const dx = pb[0] - pa[0];
-    const dy = pb[1] - pa[1];
+    return null;
+  };
+  const impassable = IMPASSABLE.map(([a, b]) => {
+    const pa = xy(a), pb = xy(b);
+    if (sectorOf(a) === sectorOf(b)) {
+      const e = sharedEdge(a, b) ?? sharedEdge(b, a);
+      if (e) return { d: e };
+    } else {
+      const qa = `${pa[1] < C[1] ? 'N' : 'S'}${pa[0] < C[0] ? 'W' : 'E'}`;
+      if ((pa[1] < C[1]) !== (pb[1] < C[1])) {
+        const t = (C[1] - pa[1]) / (pb[1] - pa[1]); // crosses the horizontal axis
+        const cx = pa[0] + t * (pb[0] - pa[0]);
+        return { d: seg(cx - HALF, C[1], cx + HALF, C[1]) };
+      }
+      if ((pa[0] < C[0]) !== (pb[0] < C[0])) {
+        const t = (C[0] - pa[0]) / (pb[0] - pa[0]); // crosses the vertical axis
+        const cy = pa[1] + t * (pb[1] - pa[1]);
+        return { d: seg(C[0], cy - HALF, C[0], cy + HALF) };
+      }
+      // inner vs outer of the same quadrant → an arc segment on the quadrant boundary arc
+      const R = r1[qa] ?? Math.hypot((pa[0] + pb[0]) / 2 - C[0], (pa[1] + pb[1]) / 2 - C[1]);
+      const ex = pb[0] - pa[0], ey = pb[1] - pa[1];
+      const fx = pa[0] - C[0], fy = pa[1] - C[1];
+      const A = ex * ex + ey * ey, B = 2 * (fx * ex + fy * ey), Cc = fx * fx + fy * fy - R * R;
+      const disc = B * B - 4 * A * Cc;
+      let cx = (pa[0] + pb[0]) / 2, cy = (pa[1] + pb[1]) / 2;
+      if (disc >= 0) {
+        const s = Math.sqrt(disc);
+        const t = [(-B + s) / (2 * A), (-B - s) / (2 * A)].find((v) => v >= 0 && v <= 1);
+        if (t !== undefined) { cx = pa[0] + t * ex; cy = pa[1] + t * ey; }
+      }
+      const a0 = Math.atan2(cy - C[1], cx - C[0]);
+      const da = HALF / R; // half the arc subtended
+      const [x0, y0] = arcPt(a0 - da, R);
+      const [x1, y1] = arcPt(a0 + da, R);
+      return { d: `M${x0},${y0} A${R},${R} 0 0,1 ${x1},${y1}` };
+    }
+    // fallback: perpendicular bar at the midpoint
+    const dx = pb[0] - pa[0], dy = pb[1] - pa[1];
     const len = Math.hypot(dx, dy) || 1;
-    const half = Math.min(len * 0.4, 30);
-    const ux = (dx / len) * half;
-    const uy = (dy / len) * half;
-    return { x1: cx + uy, y1: cy - ux, x2: cx - uy, y2: cy + ux };
+    const ux = (dx / len) * HALF, uy = (dy / len) * HALF;
+    const mx = (pa[0] + pb[0]) / 2, my = (pa[1] + pb[1]) / 2;
+    return { d: seg(mx + uy, my - ux, mx - uy, my + ux) };
   });
 
   // Labels at each sector's centroid.
@@ -420,10 +444,24 @@ export function BoardMap({ highlight, focus, onSelect, onHover, state, picking, 
   ]);
   const target = state?.targetSietchId ?? null;
   const ids = Object.keys(AREA_POSITIONS);
+  // Area to name in the maximized header (no separate detail card is visible there).
+  const active = hover ?? highlight ?? emphasis;
 
   return (
     <div className={`map-wrap${maximized ? ' maximized' : ''}`}>
       <div className="map-toolbar">
+        {maximized && (
+          <div className="map-active" aria-live="polite">
+            {active ? (
+              <>
+                <strong>{areaLabel(active)}</strong>
+                <span className="map-active-id">{active}</span>
+              </>
+            ) : (
+              <span className="map-active-hint">Hover or tap an area</span>
+            )}
+          </div>
+        )}
         <div className="map-colorby" role="group" aria-label="Colour cells by">
           <button type="button" className={colorBy === 'terrain' ? 'on' : ''} onClick={() => setColorBy('terrain')}>
             Terrain
@@ -534,11 +572,12 @@ export function BoardMap({ highlight, focus, onSelect, onHover, state, picking, 
             ))}
           </g>
 
-          {/* Impassable borders — a bold red bar (white-cased) across the border between two areas. */}
+          {/* Impassable borders — a bold red mark (white-cased) traced along the two areas' shared
+              edge: an arc on the quadrant boundary, a segment on a cross axis, or the Voronoi edge. */}
           {GEO.impassable.map((b, i) => (
-            <g key={`imp-${i}`} pointerEvents="none">
-              <line x1={b.x1} y1={b.y1} x2={b.x2} y2={b.y2} stroke="#fff" strokeWidth={6} strokeLinecap="round" vectorEffect="non-scaling-stroke" />
-              <line x1={b.x1} y1={b.y1} x2={b.x2} y2={b.y2} stroke="#c0182a" strokeWidth={3.5} strokeLinecap="round" vectorEffect="non-scaling-stroke" />
+            <g key={`imp-${i}`} pointerEvents="none" fill="none" strokeLinecap="round">
+              <path d={b.d} stroke="#fff" strokeWidth={6} vectorEffect="non-scaling-stroke" />
+              <path d={b.d} stroke="#c0182a" strokeWidth={3.5} vectorEffect="non-scaling-stroke" />
             </g>
           ))}
 

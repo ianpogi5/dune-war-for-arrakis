@@ -885,6 +885,36 @@ label.mini.check input {
 .map-max {
   font-size: 0.95rem !important;
 }
+/* Maximized header: name + id of the area under the cursor (no detail card is shown full-screen). */
+.map-colorby { order: 0; }
+.map-active { order: 1; }
+.map-zoom { order: 2; }
+.map-active {
+  flex: 1 1 auto;
+  min-width: 0;
+  text-align: center;
+  font-size: 1rem;
+  color: var(--ink);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.map-active strong {
+  font-weight: 800;
+}
+.map-active-id {
+  margin-left: 0.5rem;
+  padding: 0.05rem 0.4rem;
+  border-radius: 4px;
+  background: rgba(43, 33, 23, 0.08);
+  font-family: ui-monospace, monospace;
+  font-size: 0.82rem;
+  color: #6b5a44;
+}
+.map-active-hint {
+  color: #9a8a72;
+  font-style: italic;
+}
 .map-toolbar {
   display: flex;
   align-items: center;
