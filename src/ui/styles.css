@@ -2,7 +2,8 @@
   --sand: #c9a66b;
   --ink: #2b2117;
   --panel: #fbf6ec;
-  --accent: #8a2c1f;
+  --accent: #8b1f30; /* Harkonnen maroon (matches the cards & scoring track) */
+  --gold: #c2952f;   /* Atreides / Fremen ally accent (the gold card sidebar) */
   --line: #d8c9aa;
 }
 
@@ -77,7 +78,7 @@ header h1 {
 .panel h2 {
   margin: 0 0 0.6rem;
   font-size: 1.1rem;
-  border-bottom: 1px solid var(--line);
+  border-bottom: 2px solid var(--gold);
   padding-bottom: 0.35rem;
 }
 
@@ -759,10 +760,10 @@ label.mini.check input {
   border-radius: 50%;
   display: inline-block;
 }
-.map-legend .lg-h { background: #b3261e; }
+.map-legend .lg-h { background: #9e2436; }
 .map-legend .lg-a { background: #2f7d3a; }
 .map-legend .lg-si { background: #2f5d50; border-radius: 0; clip-path: polygon(50% 0, 100% 100%, 0 100%); }
-.map-legend .lg-st { background: #8a2c1f; border-radius: 2px; }
+.map-legend .lg-st { background: #8b1f30; border-radius: 2px; }
 .map-legend .lg-tgt { background: transparent; border: 2px solid #d4a017; }
 
 .map-pick-banner {
@@ -847,7 +848,7 @@ label.mini.check input {
   flex-direction: column;
   gap: 0.15rem;
 }
-.area-card-occ .occ-h { color: #b3261e; }
+.area-card-occ .occ-h { color: #9e2436; }
 .area-card-occ .occ-a { color: #2f7d3a; }
 .area-card-adj {
   margin-top: 0.4rem;

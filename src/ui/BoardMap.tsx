@@ -21,7 +21,7 @@ const TERRAIN_FILL: Record<Terrain, string> = {
   desert: '#e3c281',
   minor_erg: '#efdca2',
   plateau: '#bd7b3f',
-  mountain: '#8c7259',
+  mountain: '#6f5a40',
 };
 
 function fillFor(id: string): string {
@@ -258,7 +258,7 @@ export function BoardMap({ highlight, focus, onSelect, onHover, state, picking, 
                 )}
                 {st && (
                   <g opacity={st.destroyed ? 0.4 : 1}>
-                    <rect x={cx - 6} y={cy - 15} width={12} height={10} rx={1.5} fill={st.destroyed ? '#888' : '#8a2c1f'} stroke="#3a120c" strokeWidth={0.7} />
+                    <rect x={cx - 6} y={cy - 15} width={12} height={10} rx={1.5} fill={st.destroyed ? '#888' : '#8b1f30'} stroke="#3a120c" strokeWidth={0.7} />
                     <text x={cx} y={cy - 7} fontSize={8} fill="#fff" textAnchor="middle" fontWeight={700}>{st.rank}</text>
                   </g>
                 )}
@@ -271,7 +271,7 @@ export function BoardMap({ highlight, focus, onSelect, onHover, state, picking, 
             const [cx, cy] = xy(id);
             return (
               <g key={`lg-${id}`} pointerEvents="none">
-                {e.h && <circle cx={e.a ? cx - 5 : cx} cy={cy + 12} r={5} fill="#b3261e" stroke="#fff" strokeWidth={1.2} />}
+                {e.h && <circle cx={e.a ? cx - 5 : cx} cy={cy + 12} r={5} fill="#9e2436" stroke="#fff" strokeWidth={1.2} />}
                 {e.a && <circle cx={e.h ? cx + 5 : cx} cy={cy + 12} r={5} fill="#2f7d3a" stroke="#fff" strokeWidth={1.2} />}
               </g>
             );
