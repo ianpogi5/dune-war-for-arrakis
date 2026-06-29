@@ -1,8 +1,14 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import type { ActionResult, GameState, Legion, RoundPhase } from '../engine/state';
+import type { ActionResult, GameState, ImperiumPower, Legion, RoundPhase } from '../engine/state';
 import { resolveAction } from '../engine/harkonnenActions';
 import { applyHarkonnenAction, isAutoApplied } from '../engine/applyAction';
-import { availability } from '../engine/spiceMustFlow';
+import {
+  availability,
+  resolveSpiceHarvesting,
+  totalHarvesterSpice,
+  TOP_ROW,
+  BOTTOM_ROW,
+} from '../engine/spiceMustFlow';
 import { startNextRound, SUPREMACY_WIN, PHASE_ORDER, nextPhase } from '../engine/round';
 import {
   beginBattle,
@@ -126,6 +132,10 @@ function HelpPanel() {
         <li>
           <strong>Coriolis Storms</strong> — for each exposed legion, roll 2 combat dice, enter swords + specials,
           and apply the casualties.
+        </li>
+        <li>
+          <strong>Spice Must Flow</strong> — enter the spice your harvesters collected; the app spends it the solo
+          way (hold the markers, then raise spares) and updates the bans, reserve, and supremacy.
         </li>
       </ul>
       <p className="hint">Mis-tapped? <strong>↶ Undo</strong> (top right) reverts the last applied action.</p>
@@ -428,6 +438,126 @@ function StormPanel({ s, onApply }: { s: GameState; onApply: (next: GameState) =
 }
 
 // ---------------------------------------------------------------------------
+// Spice Must Flow: collect harvested spice and advance the imperium markers.
+// ---------------------------------------------------------------------------
+
+const POWER_LABEL: Record<ImperiumPower, string> = {
+  choam: 'CHOAM',
+  spacing_guild: 'Spacing Guild',
+  landsraad: 'Landsraad',
+};
+
+/** ▲ = marker moved up (better), ▼ = dropped, · = held. Row 1 is the top (best). */
+function markerArrow(from: number, to: number): string {
+  if (to < from) return '▲';
+  if (to > from) return '▼';
+  return '·';
+}
+
+function SpicePanel({ s, onApply }: { s: GameState; onApply: (next: GameState) => void }) {
+  // Default the collected spice from harvesters on the board (deep desert = 2, desert = 1);
+  // the player can override it for harvesters lost to combat or worms.
+  const harvesters = useMemo(
+    () => s.vehicles.filter((v) => v.type === 'harvester').map((v) => ({ deep: !!AREAS[v.location]?.deep })),
+    [s.vehicles],
+  );
+  const autoSpice = useMemo(() => totalHarvesterSpice(harvesters), [harvesters]);
+  const [collected, setCollected] = useState(autoSpice);
+  // Re-sync to the auto total when the board changes (e.g. a new round's harvesters).
+  useEffect(() => setCollected(autoSpice), [autoSpice]);
+
+  const outcome = useMemo(
+    () => resolveSpiceHarvesting(s.spice.markers, collected, s.spice.spiceReserve),
+    [s.spice.markers, s.spice.spiceReserve, collected],
+  );
+  const powers = Object.keys(s.spice.markers) as ImperiumPower[];
+
+  const apply = () => {
+    onApply({
+      ...s,
+      spice: {
+        ...s.spice,
+        markers: outcome.markers,
+        spiceReserve: outcome.reserve,
+        activeBans: outcome.activeBans,
+      },
+      tracks: {
+        ...s.tracks,
+        supremacy: Math.min(SUPREMACY_WIN, s.tracks.supremacy + outcome.supremacyGained),
+      },
+    });
+  };
+
+  return (
+    <section className="panel">
+      <h2>Spice Must Flow</h2>
+      <p className="hint">
+        Collect the surviving harvesters' spice, then spend it to hold the imperium markers in place
+        (2 each, lowermost first) and raise any spare (3 each). The app picks the solo allocation for you.
+      </p>
+      <label className="mini smf-collected">
+        Spice collected
+        <input
+          type="number"
+          min={0}
+          value={collected}
+          onChange={(e) => setCollected(Math.max(0, Number(e.target.value)))}
+        />
+      </label>
+      <p className="hint">
+        {harvesters.length
+          ? `Auto: ${autoSpice} from ${harvesters.length} placed harvester${harvesters.length === 1 ? '' : 's'} (${harvesters.filter((h) => h.deep).length} on deep desert). Adjust for any lost to combat or worms.`
+          : 'No harvesters on the board — enter the spice your surviving harvesters collected.'}
+        {s.spice.spiceReserve ? ` +${s.spice.spiceReserve} carried over = ${collected + s.spice.spiceReserve} to spend.` : ''}
+      </p>
+
+      <table className="smf-table">
+        <thead>
+          <tr>
+            <th>Imperium power</th>
+            <th>Row now</th>
+            <th></th>
+            <th>After</th>
+          </tr>
+        </thead>
+        <tbody>
+          {powers.map((p) => {
+            const before = s.spice.markers[p];
+            const after = outcome.markers[p];
+            const arrow = markerArrow(before, after);
+            return (
+              <tr key={p} className={after >= BOTTOM_ROW ? 'smf-banned' : ''}>
+                <td>{POWER_LABEL[p]}</td>
+                <td>{before === TOP_ROW ? `${before} (top)` : before === BOTTOM_ROW ? `${before} (ban)` : before}</td>
+                <td className={`smf-arrow ${arrow === '▲' ? 'up' : arrow === '▼' ? 'down' : ''}`}>{arrow}</td>
+                <td>{after === TOP_ROW ? `${after} (top)` : after === BOTTOM_ROW ? `${after} (ban)` : after}</td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+
+      <dl className="kv">
+        <dt>Reserve after</dt>
+        <dd>{outcome.reserve} spice</dd>
+        {outcome.supremacyGained > 0 && (
+          <>
+            <dt>Supremacy gained</dt>
+            <dd>+{outcome.supremacyGained} (markers all at top)</dd>
+          </>
+        )}
+        <dt>Active bans after</dt>
+        <dd>{outcome.activeBans.length ? outcome.activeBans.map((p) => POWER_LABEL[p]).join(', ') : 'none'}</dd>
+      </dl>
+
+      <button className="confirm-btn" onClick={apply}>
+        Apply harvesting
+      </button>
+    </section>
+  );
+}
+
+// ---------------------------------------------------------------------------
 // Board map: a schematic reference of every area, overlaid with the game state.
 // ---------------------------------------------------------------------------
 
@@ -631,7 +761,7 @@ const PHASE_GUIDE: Record<RoundPhase, string> = {
   vehicle_placement: 'Place the Harkonnen vehicles — see the Vehicle placement panel.',
   action_resolution: 'Alternate turns. Roll the Harkonnen action die and resolve it (Resolve Harkonnen turn), playing cards/leader abilities as they come up. Resolve any battles in the Battle panel.',
   desert_hazards: 'Place & resolve wormsigns, then roll Coriolis storms for exposed Harkonnen legions (Coriolis Storms panel).',
-  spice_harvesting: 'Collect spice and advance the Spice Must Flow imperium markers.',
+  spice_harvesting: 'Collect spice and advance the imperium markers in the Spice Must Flow panel.',
   end: 'Advance supremacy and reshuffle the tactical deck — use "Start next round" in This round.',
 };
 
@@ -913,6 +1043,7 @@ export function App() {
         <CardPanel s={s} onApply={commit} />
         <WormsignPanel s={s} onApply={commit} />
         <StormPanel s={s} onApply={commit} />
+        <SpicePanel s={s} onApply={commit} />
       </main>
       <footer>
         <small>State auto-saves to this browser. Use Undo to revert an applied action, or the editor's named saves to keep multiple games.</small>

@@ -912,3 +912,60 @@ label.mini.check input {
   font-weight: 700;
   border-radius: 8px;
 }
+
+/* Spice Must Flow panel */
+label.mini.smf-collected {
+  display: inline-flex;
+  flex-direction: column;
+  font-size: 0.78rem;
+  color: #6a583c;
+  gap: 0.15rem;
+  margin-bottom: 0.4rem;
+}
+
+label.mini.smf-collected input {
+  width: 4rem;
+  padding: 0.3rem 0.4rem;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  font-size: 0.9rem;
+}
+
+.smf-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 0.5rem 0 0.8rem;
+  font-size: 0.9rem;
+}
+
+.smf-table th,
+.smf-table td {
+  text-align: left;
+  padding: 0.35rem 0.5rem;
+  border-bottom: 1px solid var(--line);
+}
+
+.smf-table th {
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: #6a583c;
+}
+
+.smf-table .smf-arrow {
+  text-align: center;
+  font-weight: 700;
+}
+
+.smf-table .smf-arrow.up {
+  color: #2e7d32;
+}
+
+.smf-table .smf-arrow.down {
+  color: var(--accent);
+}
+
+.smf-table tr.smf-banned td {
+  color: var(--accent);
+  font-weight: 600;
+}
