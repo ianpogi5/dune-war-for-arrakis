@@ -19,9 +19,10 @@ truth; the app is the co‑processor.**
 ## Screenshots
 
 ### Interactive board map
-Every one of the 101 areas, plotted from the real board and colored by terrain, with your pieces
-overlaid (legions, sietches, settlements, the target‑sietch halo, wormsigns). Hover or tap a dot for
-full details, or use **Find an area** to locate one. Pinch‑zoom & pan on touch.
+Every one of the 101 areas, drawn as its real traced shape and colored by terrain (impassable walls
+and air zones included), with your pieces overlaid (legions, sietches, settlements, the target‑sietch
+halo, wormsigns). Hover or tap a dot for full details, or use **Find an area** to locate one — any
+area or air‑zone name elsewhere in the app jumps here and pulses it. Pinch‑zoom & pan on touch.
 
 ![Board map](screenshots/board-map.png)
 
@@ -56,16 +57,19 @@ Responsive layout; the board map supports pinch‑zoom and pan so dots stay tapp
 - **Full Harkonnen decision engine** — action‑die resolution (Leadership/Strategy/Mentat/Deployment/
   House) via the solo priority cascade, shortest‑path movement, the "cease attack" rule, deployment,
   vehicle placement, and planning‑card / named‑leader special abilities.
-- **Round‑by‑round battle resolver** — enter each round's physical dice; the app applies the
-  Harkonnen casualty priority, leader combat abilities, reinforcement spending, reserve
-  replenishment, and destroys a taken sietch.
+- **Round‑by‑round battle resolver** — enter each round's physical dice; the app reveals deployment
+  tokens to units at the start of the battle, then applies the Harkonnen casualty priority, leader
+  combat abilities, reinforcement spending, reserve replenishment, and destroys a taken sietch.
 - **Desert Hazards** — official wormsign placement (terrain + occupancy rules) and Coriolis storm
   resolution.
-- **Spice Must Flow** — imperium markers drive action‑dice and vehicle availability and the bans.
-- **Interactive board map** — locate any area (named or unnamed) and see the whole game state at a
-  glance; doubles as an area picker for the editor.
+- **Spice Must Flow** — imperium markers drive action‑dice and vehicle availability and the bans;
+  a harvesting panel previews and applies the solo spice allocation, completing the round in‑app.
+- **Interactive board map** — all 101 areas drawn as their real traced shapes, colored by terrain
+  (or by sector), with impassable walls, air zones, and your whole game state overlaid. Locate any
+  area or air zone from anywhere in the app — names everywhere are clickable and pulse the map. It
+  also doubles as an area picker for the editor, with pinch‑zoom, pan, and a full‑window view.
 - **Persistence** — auto‑save to the browser, multiple named saves, plus JSON export/import.
-- **Built to be trustworthy** — a headless, pure‑TypeScript engine covered by **233 tests**.
+- **Built to be trustworthy** — a headless, pure‑TypeScript engine covered by **238 tests**.
 
 ## How it works
 
