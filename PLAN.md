@@ -167,6 +167,19 @@ Pure TS + tests, no UI. Model the round and the priority cascades from fan-summa
       Harkonnen action — resolve/card/leader/next-round apply through `commit` (snapshots first);
       import/named-load/reset start a fresh history via `loadGame`. TODO: more polish, then Capacitor.
 
+### Phase 6 — Onboarding & teaching  *(future)*
+Lower the barrier for a brand-new solo player picking up the app cold.
+- [ ] **Guided board setup.** A step-by-step wizard that walks the player through physically
+      laying out the board for a fresh Mahdi-solo game (place Atreides sietch legions, deployment
+      tokens, named-leader/reserve pool, imperium markers, harvesting sector + target sietch draws),
+      instead of dropping them at the StateEditor. Builds on `newGameState()` — narrate each piece
+      as the app sets it, with the interactive board map showing where things go.
+- [ ] **Teach solo mode.** In-app tutorial / first-run experience that explains how Mahdi solo
+      works (you play Atreides; the app runs the Harkonnen AI; how a round flows: dice → actions →
+      battles → spice → storms) so a player who's never run the solo rules can learn by playing.
+      Could ride on the existing PhasePanel walkthrough + "How to use" help, expanded into a real
+      onboarding flow.
+
 ## 4. Current status (update me each session)
 
 - **✅ Phase 0 COMPLETE (2026-06-27).** All board data captured & user-verified in `BOARD_VERIFICATION.md`:
