@@ -19,6 +19,7 @@ import {
 } from '../engine/combat';
 import { resolveCombatRoll, type RawRoll } from '../engine/combatRoll';
 import { commitBattle } from '../engine/battleApply';
+import { revealDeploymentTokens } from '../engine/revealTokens';
 import { combatDiceDiscardBanned } from '../engine/imperiumBans';
 import { placeVehicles } from '../engine/vehiclePlacement';
 import { resolveCardPlay } from '../engine/cardEffects';
@@ -868,12 +869,20 @@ function BattlePanel({ s, onApply }: { s: GameState; onApply: (next: GameState) 
   const [session, setSession] = useState<BattleSession | null>(null);
   const [att, setAtt] = useState<RawRoll>(emptyRaw);
   const [def, setDef] = useState<RawRoll>(emptyRaw);
+  // Pending token reveal: a battle whose legions still have facedown deployment tokens. The
+  // rulebook flips them to units before the first round; the player reads the units off the
+  // physical tokens, so we collect the revealed composition here first.
+  const [reveal, setReveal] = useState<{
+    pair: BattlePair;
+    atk: Legion['units'];
+    def: Legion['units'];
+  } | null>(null);
 
-  const start = (pair: BattlePair) => {
-    const sietch = s.sietches.find((si) => si.area === pair.area && !si.destroyed);
+  const beginWith = (attacker: Legion, defender: Legion, area: string) => {
+    const sietch = s.sietches.find((si) => si.area === area && !si.destroyed);
     const ctx: BattleContext = {
-      attacker: pair.attacker,
-      defender: pair.defender,
+      attacker,
+      defender,
       defenderSettlementRank: sietch?.rank ?? undefined,
       surprise,
       reinforcements: s.decks.reinforcements,
@@ -882,6 +891,33 @@ function BattlePanel({ s, onApply }: { s: GameState; onApply: (next: GameState) 
     setSession(beginBattle(ctx));
     setAtt(emptyRaw());
     setDef(emptyRaw());
+  };
+
+  const start = (pair: BattlePair) => {
+    if (pair.attacker.deploymentTokens > 0 || pair.defender.deploymentTokens > 0) {
+      setReveal({
+        pair,
+        atk: { regular: pair.attacker.deploymentTokens, elite: 0, special_elite: 0 },
+        def: { regular: pair.defender.deploymentTokens, elite: 0, special_elite: 0 },
+      });
+      return;
+    }
+    beginWith(pair.attacker, pair.defender, pair.area);
+  };
+
+  // Commit the reveal (tokens → units, Harkonnen markers back to the pool) as its own game step,
+  // then open the battle on the now token-free legions.
+  const confirmReveal = () => {
+    if (!reveal) return;
+    const { pair, atk, def: defUnits } = reveal;
+    let next = s;
+    if (pair.attacker.deploymentTokens > 0) next = revealDeploymentTokens(next, pair.area, 'harkonnen', atk);
+    if (pair.defender.deploymentTokens > 0) next = revealDeploymentTokens(next, pair.area, 'atreides', defUnits);
+    onApply(next);
+    const attacker = next.legions.find((l) => l.faction === 'harkonnen' && l.area === pair.area)!;
+    const defender = next.legions.find((l) => l.faction === 'atreides' && l.area === pair.area)!;
+    setReveal(null);
+    beginWith(attacker, defender, pair.area);
   };
 
   const applyRound = () => {
@@ -899,6 +935,25 @@ function BattlePanel({ s, onApply }: { s: GameState; onApply: (next: GameState) 
     onApply(state);
     setSession(null);
   };
+
+  const unitInputs = (label: string, u: Legion['units'], setU: (u: Legion['units']) => void) => (
+    <div className="storm-row">
+      <div className="storm-area">
+        <strong>{label}</strong>
+      </div>
+      {(['regular', 'elite', 'special_elite'] as const).map((k) => (
+        <label key={k} className="mini">
+          {k === 'regular' ? 'Regular' : k === 'elite' ? 'Elite' : 'Sardaukar'}
+          <input
+            type="number"
+            min={0}
+            value={u[k]}
+            onChange={(e) => setU({ ...u, [k]: Math.max(0, Number(e.target.value)) })}
+          />
+        </label>
+      ))}
+    </div>
+  );
 
   const rawInputs = (label: string, raw: RawRoll, setRaw: (r: RawRoll) => void) => (
     <div className="storm-row">
@@ -924,7 +979,23 @@ function BattlePanel({ s, onApply }: { s: GameState; onApply: (next: GameState) 
       <h2>Battle</h2>
       <p className="hint">Resolve a Harkonnen attack on an Atreides legion sharing an area. Enter each round's physical dice; the Harkonnen casualties, reserve, and any destroyed sietch are applied for you.</p>
 
-      {!session && (
+      {reveal && (
+        <>
+          <p className="directive-text">
+            Flip the facedown deployment tokens at <strong><AreaChip id={reveal.pair.area} /></strong> and enter the units they reveal — they fight (and can be lost) as those units this battle.
+          </p>
+          {reveal.pair.attacker.deploymentTokens > 0 &&
+            unitInputs(`Harkonnen ${reveal.pair.attacker.deploymentTokens} token${reveal.pair.attacker.deploymentTokens === 1 ? '' : 's'} reveal`, reveal.atk, (u) => setReveal({ ...reveal, atk: u }))}
+          {reveal.pair.defender.deploymentTokens > 0 &&
+            unitInputs(`Atreides ${reveal.pair.defender.deploymentTokens} token${reveal.pair.defender.deploymentTokens === 1 ? '' : 's'} reveal`, reveal.def, (u) => setReveal({ ...reveal, def: u }))}
+          <div className="directive-actions">
+            <button className="confirm-btn" onClick={confirmReveal}>Reveal &amp; begin battle</button>
+            <button className="die" onClick={() => setReveal(null)}>Cancel</button>
+          </div>
+        </>
+      )}
+
+      {!session && !reveal && (
         pairs.length === 0 ? (
           <p className="hint">No area has a Harkonnen and an Atreides legion together. Move a Harkonnen legion onto a defender first.</p>
         ) : (
