@@ -145,18 +145,14 @@ const GEO = (() => {
   // point in the region belongs to the nearest area IN that sector (no orphaned strips), cells fill
   // the whole region, and cross-sector-adjacent areas meet along the divider lines.
   const cells: { id: string; d: string; terrainFill: string; sector: string }[] = [];
-  const cellPoly: Record<string, [number, number][]> = {};
   for (const [s, as] of sectorAreas) {
     if (s === 'np') continue;
     const seeds = as.map(xy);
     const pad: [number, number][] = seeds.length >= 2 ? seeds : [seeds[0], [seeds[0][0] + 0.01, seeds[0][1]]];
     const vor = Delaunay.from(pad).voronoi([0, 0, W, H]);
     as.forEach((id, i) => {
-      const j = Math.min(i, pad.length - 1);
-      const d = vor.renderCell(j);
+      const d = vor.renderCell(Math.min(i, pad.length - 1));
       if (d) cells.push({ id, d, terrainFill: fillFor(id), sector: s });
-      const poly = vor.cellPolygon(j);
-      if (poly) cellPoly[id] = poly as [number, number][];
     });
   }
 
@@ -191,73 +187,75 @@ const GEO = (() => {
     return { id: z.id, x, y };
   });
 
-  // Impassable borders: a bold mark drawn ALONG the real shared edge between the two areas.
-  //  • different sectors → the edge is a divider, so we trace the divider itself: an ARC segment on
-  //    the quadrant arc (inner vs outer), or a straight segment on the cross axis (across a quadrant).
-  //  • same sector → the edge is the Voronoi edge they share; we find it on cell a's polygon.
-  // Each returns an SVG path `d` (a line "M..L.." or an arc "M..A..").
-  const HALF = 26; // half-length of the mark, in board units
-  const seg = (x1: number, y1: number, x2: number, y2: number) => `M${x1},${y1} L${x2},${y2}`;
-  // shared Voronoi edge of same-sector neighbours a,b: the polygon edge of a whose endpoints are
-  // equidistant to a and b. Centre the mark on it, capped to HALF so big cells don't get a huge bar.
-  const sharedEdge = (a: string, b: string): string | null => {
-    const poly = cellPoly[a];
-    if (!poly) return null;
-    const [ax, ay] = xy(a), [bx, by] = xy(b);
-    const eq = (p: [number, number]) => Math.abs(Math.hypot(p[0] - ax, p[1] - ay) - Math.hypot(p[0] - bx, p[1] - by));
-    for (let i = 0; i < poly.length - 1; i++) {
-      const p = poly[i], q = poly[i + 1];
-      if (eq(p) < 2 && eq(q) < 2) {
-        const mx = (p[0] + q[0]) / 2, my = (p[1] + q[1]) / 2;
-        const L = Math.hypot(q[0] - p[0], q[1] - p[1]) || 1;
-        const h = Math.min(L / 2, HALF);
-        const ux = ((q[0] - p[0]) / L) * h, uy = ((q[1] - p[1]) / L) * h;
-        return seg(mx - ux, my - uy, mx + ux, my + uy);
-      }
+  // Impassable borders: a bold mark traced along the two areas' VISIBLE shared edge — the locus of
+  // points whose nearest cell (within the clipped sector regions) is a on one side and b on the
+  // other. We sample that locus and keep the run that actually shows on the map, so the mark sits
+  // exactly where the cells touch (and only there) — not on an unclipped Voronoi edge that's been
+  // clipped away. Works the same for same-sector (Voronoi bisector) and cross-sector (divider) pairs.
+  const secPts: Record<string, { id: string; p: [number, number] }[]> = {};
+  for (const [s, as] of sectorAreas) secPts[s] = as.map((id) => ({ id, p: xy(id) }));
+  const nearestIn = (s: string, p: [number, number]): string | null => {
+    let best: string | null = null, bd = Infinity;
+    for (const { id, p: q } of secPts[s] ?? []) { const d = (p[0] - q[0]) ** 2 + (p[1] - q[1]) ** 2; if (d < bd) { bd = d; best = id; } }
+    return best;
+  };
+  // quadrant + ring (inner/outer) of each sector, so we can test if a point shows in a sector's region.
+  const quadOfSec: Record<string, string> = {};
+  const ringOfSec: Record<string, 'inner' | 'outer'> = {};
+  for (const q of QUADS) {
+    if (!ringSector[q]) continue;
+    quadOfSec[ringSector[q].inner] = q; ringOfSec[ringSector[q].inner] = 'inner';
+    quadOfSec[ringSector[q].outer] = q; ringOfSec[ringSector[q].outer] = 'outer';
+  }
+  const inRegion = (sec: string, p: [number, number]): boolean => {
+    const q = quadOfSec[sec];
+    if (!q) return true;
+    const r = Math.hypot(p[0] - C[0], p[1] - C[1]);
+    return ringOfSec[sec] === 'inner' ? r >= r0 - 2 && r <= r1[q] + 2 : r >= r1[q] - 2;
+  };
+  // Longest contiguous run of locus points that belong to BOTH cells (and show), → a polyline path.
+  const pathFromRun = (locus: [number, number][], keep: (p: [number, number]) => boolean): string | null => {
+    let best: [number, number][] = [], cur: [number, number][] = [];
+    for (const p of locus) {
+      if (keep(p)) cur.push(p);
+      else { if (cur.length > best.length) best = cur; cur = []; }
     }
-    return null;
+    if (cur.length > best.length) best = cur;
+    if (best.length < 2) return null;
+    return 'M' + best.map((p) => `${p[0].toFixed(1)},${p[1].toFixed(1)}`).join(' L');
   };
   const impassable = IMPASSABLE.map(([a, b]) => {
-    const pa = xy(a), pb = xy(b);
-    if (sectorOf(a) === sectorOf(b)) {
-      const e = sharedEdge(a, b) ?? sharedEdge(b, a);
-      if (e) return { d: e };
+    const pa = xy(a), pb = xy(b), sa = sectorOf(a), sb = sectorOf(b);
+    let locus: [number, number][] = [];
+    let keep: (p: [number, number]) => boolean;
+    if (sa === sb) {
+      // sample the perpendicular bisector of a,b across the board; the shared edge lives on it
+      const mx = (pa[0] + pb[0]) / 2, my = (pa[1] + pb[1]) / 2;
+      const dx = pb[0] - pa[0], dy = pb[1] - pa[1];
+      const L = Math.hypot(dx, dy) || 1;
+      const nx = -dy / L, ny = dx / L;
+      for (let t = -260; t <= 260; t += 4) locus.push([mx + nx * t, my + ny * t]);
+      keep = (p) => inRegion(sa, p) && (nearestIn(sa, p) === a || nearestIn(sa, p) === b);
     } else {
-      const qa = `${pa[1] < C[1] ? 'N' : 'S'}${pa[0] < C[0] ? 'W' : 'E'}`;
       if ((pa[1] < C[1]) !== (pb[1] < C[1])) {
-        const t = (C[1] - pa[1]) / (pb[1] - pa[1]); // crosses the horizontal axis
-        const cx = pa[0] + t * (pb[0] - pa[0]);
-        return { d: seg(cx - HALF, C[1], cx + HALF, C[1]) };
+        for (let x = 60; x <= W - 60; x += 4) locus.push([x, C[1]]); // horizontal axis divider
+      } else if ((pa[0] < C[0]) !== (pb[0] < C[0])) {
+        for (let y = 60; y <= H - 60; y += 4) locus.push([C[0], y]); // vertical axis divider
+      } else {
+        const q = `${pa[1] < C[1] ? 'N' : 'S'}${pa[0] < C[0] ? 'W' : 'E'}`; // quadrant arc divider
+        const R = r1[q] ?? Math.hypot((pa[0] + pb[0]) / 2 - C[0], (pa[1] + pb[1]) / 2 - C[1]);
+        const [lo, hi] = ANG[q];
+        for (let ang = lo; ang <= hi; ang += 0.01) locus.push(arcPt(ang, R));
       }
-      if ((pa[0] < C[0]) !== (pb[0] < C[0])) {
-        const t = (C[0] - pa[0]) / (pb[0] - pa[0]); // crosses the vertical axis
-        const cy = pa[1] + t * (pb[1] - pa[1]);
-        return { d: seg(C[0], cy - HALF, C[0], cy + HALF) };
-      }
-      // inner vs outer of the same quadrant → an arc segment on the quadrant boundary arc
-      const R = r1[qa] ?? Math.hypot((pa[0] + pb[0]) / 2 - C[0], (pa[1] + pb[1]) / 2 - C[1]);
-      const ex = pb[0] - pa[0], ey = pb[1] - pa[1];
-      const fx = pa[0] - C[0], fy = pa[1] - C[1];
-      const A = ex * ex + ey * ey, B = 2 * (fx * ex + fy * ey), Cc = fx * fx + fy * fy - R * R;
-      const disc = B * B - 4 * A * Cc;
-      let cx = (pa[0] + pb[0]) / 2, cy = (pa[1] + pb[1]) / 2;
-      if (disc >= 0) {
-        const s = Math.sqrt(disc);
-        const t = [(-B + s) / (2 * A), (-B - s) / (2 * A)].find((v) => v >= 0 && v <= 1);
-        if (t !== undefined) { cx = pa[0] + t * ex; cy = pa[1] + t * ey; }
-      }
-      const a0 = Math.atan2(cy - C[1], cx - C[0]);
-      const da = HALF / R; // half the arc subtended
-      const [x0, y0] = arcPt(a0 - da, R);
-      const [x1, y1] = arcPt(a0 + da, R);
-      return { d: `M${x0},${y0} A${R},${R} 0 0,1 ${x1},${y1}` };
+      // both cells must actually reach the divider here (in their clipped regions) and be nearest.
+      keep = (p) => nearestIn(sa, p) === a && nearestIn(sb, p) === b && inRegion(sa, p) && inRegion(sb, p);
     }
-    // fallback: perpendicular bar at the midpoint
-    const dx = pb[0] - pa[0], dy = pb[1] - pa[1];
-    const len = Math.hypot(dx, dy) || 1;
-    const ux = (dx / len) * HALF, uy = (dy / len) * HALF;
-    const mx = (pa[0] + pb[0]) / 2, my = (pa[1] + pb[1]) / 2;
-    return { d: seg(mx + uy, my - ux, mx - uy, my + ux) };
+    const d = pathFromRun(locus, keep);
+    if (d) return { d };
+    // fallback (cells don't visibly touch): a short bar at the midpoint so the wall still shows
+    const dx = pb[0] - pa[0], dy = pb[1] - pa[1], L = Math.hypot(dx, dy) || 1;
+    const ux = (dx / L) * 22, uy = (dy / L) * 22, mx = (pa[0] + pb[0]) / 2, my = (pa[1] + pb[1]) / 2;
+    return { d: `M${mx + uy},${my - ux} L${mx - uy},${my + ux}` };
   });
 
   // Labels at each sector's centroid.
