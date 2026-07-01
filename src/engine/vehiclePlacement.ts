@@ -197,9 +197,10 @@ export function placeCarryalls(
     .filter((z) => z.n > 0)
     .sort((a, b) => (b.n !== a.n ? b.n - a.n : a.id.localeCompare(b.id)))
     .map((z) => z.id);
-  // Fallback: any remaining free zone (for card effects that must always place).
-  const fallback = free.filter((id) => !primary.includes(id)).sort();
-  return [...primary, ...fallback].slice(0, count);
+  // Fallback: any remaining free zone — only used when no harvester-protecting zone exists
+  // (e.g. a card places a carryall before any harvesters are on the board).
+  const candidates = primary.length > 0 ? primary : free.sort();
+  return candidates.slice(0, count);
 }
 
 // --- ornithopter placement -------------------------------------------------
