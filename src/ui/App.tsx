@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import type { ActionResult, GameState, ImperiumPower, Legion, RoundPhase } from '../engine/state';
 import { resolveAction } from '../engine/harkonnenActions';
 import { applyHarkonnenAction, isAutoApplied } from '../engine/applyAction';
@@ -107,10 +107,11 @@ function HelpPanel() {
           <strong>Games</strong> — new game, export/import a backup, reset, and your named saves (load/delete).
         </li>
         <li>
-          <strong>Board map</strong> — every area colored by terrain with your pieces overlaid. Tap/hover a dot for full
-          details, or use <em>Find an area</em>. Pinch or use +/− to zoom (one-finger drag to pan) — handy on a phone.
-          The 📍 button on a legion lets you set its area by tapping the map. Anywhere an area name shows a
-          📍 pin, tap it to jump here and pulse that area — so you can always see where it is.
+          <strong>Board map</strong> — open it anytime with the floating <strong>🗺</strong> button (bottom-right). Every
+          area colored by terrain with your pieces overlaid; tap/hover a dot for details, or use <em>Find an area</em>.
+          Pinch or use +/− to zoom (one-finger drag to pan). The 📍 button on any area field pops the map open to set
+          that area by tapping — pick one and the map closes right back to where you were. Any 📍 area name elsewhere
+          jumps here and pulses that area.
         </li>
         <li>
           <strong>This round</strong> — the Harkonnen's dice, vehicles, and active bans. <em>Start next round</em> when done.
@@ -688,6 +689,24 @@ function AreaInfoCard({ id, s }: { id: string | null; s: GameState }) {
   );
 }
 
+/** A short confirmation for the toast after a pick is assigned to an area. */
+function describePicked(p: PickTarget, id: string): string {
+  const label = areaLabel(id);
+  switch (p.kind) {
+    case 'legion':
+      return `Legion set to ${label}`;
+    case 'wormsign':
+      return `Wormsign ${p.index + 1} placed at ${label}`;
+    case 'sandworm':
+      return `Sandworm ${p.index + 1} placed at ${label}`;
+    case 'target':
+      return `Target sietch set to ${label}`;
+  }
+}
+
+// The board map lives in a floating overlay (opened by the 🗺 button or whenever an area pick
+// starts) rather than an inline panel, so picking never scrolls you away from your place: choose
+// an area and the overlay closes, leaving you exactly where you were with a confirmation toast.
 function BoardMapPanel({
   s,
   onChange,
@@ -695,7 +714,10 @@ function BoardMapPanel({
   clearPick,
   locate,
   clearLocate,
-  panelRef,
+  open,
+  onOpen,
+  onClose,
+  onConfirm,
 }: {
   s: GameState;
   onChange: (next: GameState) => void;
@@ -703,7 +725,10 @@ function BoardMapPanel({
   clearPick: () => void;
   locate: string | null;
   clearLocate: () => void;
-  panelRef: React.RefObject<HTMLDetailsElement>;
+  open: boolean;
+  onOpen: () => void;
+  onClose: () => void;
+  onConfirm: (msg: string) => void;
 }) {
   const [picked, setPicked] = useState<string | null>(null);
   const [hovered, setHovered] = useState<string | null>(null);
@@ -716,27 +741,6 @@ function BoardMapPanel({
     if (!id || AREAS[id]) setPicked(id);
     if (id) setFocus({ id, nonce: Date.now() });
   };
-
-  // When the editor requests a pick, open the map and scroll it into view.
-  useEffect(() => {
-    if (pick && panelRef.current) {
-      panelRef.current.open = true;
-      panelRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
-  }, [pick, panelRef]);
-
-  // When a locate chip is clicked, select that area, open the map, and scroll to it (the
-  // highlight prop pulses it). Then clear the one-shot request.
-  useEffect(() => {
-    if (!locate) return;
-    focusArea(locate);
-    if (panelRef.current) {
-      panelRef.current.open = true;
-      panelRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
-    clearLocate();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [locate, clearLocate, panelRef]);
 
   // The area currently held by the pick target (to highlight while picking), and a description.
   let pickArea: string | null = null;
@@ -758,6 +762,45 @@ function BoardMapPanel({
     }
   }
 
+  // A pick starts → open the overlay and centre it on the target's current area.
+  useEffect(() => {
+    if (!pick) return;
+    onOpen();
+    if (pickArea) setFocus({ id: pickArea, nonce: Date.now() });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pick]);
+
+  // A locate chip is clicked → open the overlay, select + pulse that area, then clear the request.
+  useEffect(() => {
+    if (!locate) return;
+    focusArea(locate);
+    onOpen();
+    clearLocate();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [locate]);
+
+  // While open: lock background scroll and let Escape close the overlay (cancelling any pick).
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') closeOverlay();
+    };
+    document.addEventListener('keydown', onKey);
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.removeEventListener('keydown', onKey);
+      document.body.style.overflow = prevOverflow;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, pick]);
+
+  // Closing the overlay also cancels an in-progress pick (nothing gets assigned).
+  const closeOverlay = () => {
+    if (pick) clearPick();
+    onClose();
+  };
+
   // Wormsigns & sandworms have terrain + occupancy rules; valid targets stay clickable, others dim.
   const wormPick = pick?.kind === 'wormsign' || pick?.kind === 'sandworm';
   const selectable =
@@ -770,7 +813,7 @@ function BoardMapPanel({
   const onMapSelect = (id: string) => {
     if (!pick) {
       setPicked(id);
-      return;
+      return; // browsing: just show the info card, keep the overlay open
     }
     if (selectable && !selectable(id)) return; // ignore invalid terrain
     if (pick.kind === 'legion') {
@@ -783,58 +826,76 @@ function BoardMapPanel({
       onChange({ ...s, targetSietchId: id });
     }
     setPicked(id);
+    onConfirm(describePicked(pick, id));
     clearPick();
+    onClose(); // pick done → dismiss the overlay, returning to where the player was
   };
 
   const active = hovered ?? (pick ? pickArea : picked);
 
   return (
-    <details className="panel" ref={panelRef}>
-      <summary className="map-summary">Board map</summary>
-      <p className="hint">Every area, colored by terrain, with your pieces overlaid. Hover or click a dot for full details; use <em>Find an area</em> to locate one. Any 📍 area name elsewhere in the app jumps here and pulses that area.</p>
+    <>
+      {!open && (
+        <button className="map-fab" title="Open board map" aria-label="Open board map" onClick={onOpen}>
+          🗺
+        </button>
+      )}
+      {open && (
+        <div className="map-modal-overlay" onClick={closeOverlay}>
+          <div className="map-modal panel" role="dialog" aria-label="Board map" onClick={(e) => e.stopPropagation()}>
+            <div className="map-modal-head">
+              <h2>Board map</h2>
+              <button className="map-close" onClick={closeOverlay} title="Close map" aria-label="Close map">
+                ✕
+              </button>
+            </div>
+            <p className="hint">Every area, colored by terrain, with your pieces overlaid. Hover or click a dot for full details; use <em>Find an area</em> to locate one.</p>
 
-      {pick && (
-        <div className="map-pick-banner">
-          Click an area to set <strong>{pickWhat}</strong>.
-          {wormPick && ' Only valid Desert areas are highlighted; the rest are dimmed.'}
-          <button className="die" onClick={clearPick}>Cancel</button>
+            {pick && (
+              <div className="map-pick-banner">
+                Click an area to set <strong>{pickWhat}</strong>.
+                {wormPick && ' Only valid Desert areas are highlighted; the rest are dimmed.'}
+                <button className="die" onClick={closeOverlay}>Cancel</button>
+              </div>
+            )}
+
+            <label className="map-pick">
+              Find an area
+              <select value={picked ?? ''} onChange={(e) => focusArea(e.target.value || null)}>
+                <option value="">— select —</option>
+                {SORTED_AREA_IDS.map((id) => (
+                  <option key={id} value={id}>
+                    {areaLabel(id)}
+                  </option>
+                ))}
+              </select>
+            </label>
+
+            <BoardMap
+              state={s}
+              highlight={pick ? pickArea : picked}
+              focus={focus}
+              onSelect={onMapSelect}
+              onHover={setHovered}
+              picking={!!pick}
+              selectable={selectable}
+            />
+
+            <AreaInfoCard id={active} s={s} />
+
+            <div className="map-legend">
+              <span><i className="lg-h" /> Harkonnen</span>
+              <span><i className="lg-a" /> Atreides</span>
+              <span><i className="lg-si" /> Sietch</span>
+              <span><i className="lg-st" /> Settlement</span>
+              <span><i className="lg-tgt" /> Target sietch</span>
+              <span><i className="lg-az" /> Air zone</span>
+              <span><i className="lg-imp" /> Impassable</span>
+            </div>
+          </div>
         </div>
       )}
-
-      <label className="map-pick">
-        Find an area
-        <select value={picked ?? ''} onChange={(e) => focusArea(e.target.value || null)}>
-          <option value="">— select —</option>
-          {SORTED_AREA_IDS.map((id) => (
-            <option key={id} value={id}>
-              {areaLabel(id)}
-            </option>
-          ))}
-        </select>
-      </label>
-
-      <BoardMap
-        state={s}
-        highlight={pick ? pickArea : picked}
-        focus={focus}
-        onSelect={onMapSelect}
-        onHover={setHovered}
-        picking={!!pick}
-        selectable={selectable}
-      />
-
-      <AreaInfoCard id={active} s={s} />
-
-      <div className="map-legend">
-        <span><i className="lg-h" /> Harkonnen</span>
-        <span><i className="lg-a" /> Atreides</span>
-        <span><i className="lg-si" /> Sietch</span>
-        <span><i className="lg-st" /> Settlement</span>
-        <span><i className="lg-tgt" /> Target sietch</span>
-        <span><i className="lg-az" /> Air zone</span>
-        <span><i className="lg-imp" /> Impassable</span>
-      </div>
-    </details>
+    </>
   );
 }
 
@@ -1156,15 +1217,25 @@ export function App() {
   const [pick, setPick] = useState<PickTarget | null>(null);
   // Active "show this area on the map" request from a locate chip.
   const [locate, setLocate] = useState<string | null>(null);
+  // Whether the floating board-map overlay is open.
+  const [mapOpen, setMapOpen] = useState(false);
+  // Transient confirmation toast (e.g. after placing a wormsign via the map).
+  const [toast, setToast] = useState<string | null>(null);
   // Show only the current phase's action panels, or all of them (escape hatch).
   const [showAllPanels, setShowAllPanels] = useState(false);
   const inPhase = (...phases: RoundPhase[]) => showAllPanels || phases.includes(s.phase);
-  const mapRef = useRef<HTMLDetailsElement>(null);
 
   // Persist on every change.
   useEffect(() => {
     saveState(s);
   }, [s]);
+
+  // Auto-dismiss the confirmation toast.
+  useEffect(() => {
+    if (!toast) return;
+    const t = setTimeout(() => setToast(null), 2600);
+    return () => clearTimeout(t);
+  }, [toast]);
 
   // Apply an AI action: snapshot the current state first so it can be undone.
   const commit = (next: GameState) => {
@@ -1218,15 +1289,6 @@ export function App() {
       <main>
         <HelpPanel />
         <GamesPanel s={s} onReset={reset} onNewGame={startNewGame} onExport={exportGame} onImport={loadGame} />
-        <BoardMapPanel
-          s={s}
-          onChange={setS}
-          pick={pick}
-          clearPick={() => setPick(null)}
-          locate={locate}
-          clearLocate={() => setLocate(null)}
-          panelRef={mapRef}
-        />
         <StateEditor s={s} onChange={setS} onPick={setPick} pick={pick} />
         <RoundPanel s={s} onChange={commit} />
         <PhasePanel s={s} onChange={setS} showAll={showAllPanels} onToggleShowAll={setShowAllPanels} />
@@ -1242,6 +1304,20 @@ export function App() {
       <footer>
         <small>State auto-saves to this browser. Use Undo to revert an applied action, or the editor's named saves to keep multiple games.</small>
       </footer>
+
+      <BoardMapPanel
+        s={s}
+        onChange={setS}
+        pick={pick}
+        clearPick={() => setPick(null)}
+        locate={locate}
+        clearLocate={() => setLocate(null)}
+        open={mapOpen}
+        onOpen={() => setMapOpen(true)}
+        onClose={() => setMapOpen(false)}
+        onConfirm={setToast}
+      />
+      {toast && <div className="toast" role="status">✓ {toast}</div>}
     </div>
     </LocateContext.Provider>
   );
