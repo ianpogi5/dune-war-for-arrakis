@@ -8,6 +8,7 @@ import {
   drawTacticalCards,
   reselectTargetSietch,
   shuffle,
+  setupRound,
   startNextRound,
 } from './round';
 import type { GameState, TacticalCard } from './state';
@@ -128,6 +129,23 @@ function miniState(over: Partial<GameState> = {}): GameState {
     ...over,
   };
 }
+
+describe('setupRound', () => {
+  it('draws the harvesting sector + target and advances to vehicle placement', () => {
+    const s = miniState({ round: 1, phase: 'start', tracks: { supremacy: 0, prescience: [0, 0, 0] } });
+    const next = setupRound(s, () => 0);
+    expect(next.phase).toBe('vehicle_placement');
+    expect(next.harvestingSector).not.toBeNull();
+    expect(next.targetSietchId).not.toBeNull();
+  });
+
+  it('does NOT change the round number or supremacy (start-of-round only)', () => {
+    const s = miniState({ round: 1, phase: 'start', tracks: { supremacy: 0, prescience: [0, 0, 0] } });
+    const next = setupRound(s, () => 0);
+    expect(next.round).toBe(1);
+    expect(next.tracks.supremacy).toBe(0);
+  });
+});
 
 describe('startNextRound', () => {
   it('advances the round and supremacy, draws harvesting + target', () => {

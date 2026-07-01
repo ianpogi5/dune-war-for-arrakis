@@ -144,12 +144,13 @@ export interface NextRoundResult {
 }
 
 /**
- * Begin the next solo round: advance the supremacy marker by 1 (end-of-round rule, capped at the
- * win step), then reshuffle the tactical deck and draw the harvesting sector + target sietch.
- * Sietches already destroyed are skipped for the target. `rng` is injectable for deterministic tests.
+ * Set up the CURRENT round: reshuffle the tactical deck and draw its harvesting sector + target
+ * sietch, then move to the first phase (vehicle placement). Sietches already destroyed are skipped
+ * for the target. This is the start-of-round step — it does NOT touch the round number or the
+ * supremacy marker (those are end-of-round concerns), so it's what begins round 1 of a new game.
+ * `rng` is injectable for deterministic tests.
  */
-export function startNextRound(s: GameState, rng: () => number = Math.random): NextRoundResult {
-  const supremacy = Math.min(SUPREMACY_WIN, s.tracks.supremacy + SUPREMACY_PER_ROUND);
+export function setupRound(s: GameState, rng: () => number = Math.random): GameState {
   const isDestroyed = (id: string) => s.sietches.find((si) => si.area === id)?.destroyed ?? false;
 
   const deck = shuffle(TACTICAL_CARDS, rng);
@@ -163,15 +164,23 @@ export function startNextRound(s: GameState, rng: () => number = Math.random): N
     // No eligible target (e.g. few sietches left) — leave target unset for the player to pick.
   }
 
+  return { ...s, phase: 'vehicle_placement', harvestingSector, targetSietchId };
+}
+
+/**
+ * End the current round and begin the next: advance the supremacy marker by 1 (end-of-round rule,
+ * capped at the win step), bump the round number, then run the next round's start-of-round setup
+ * ([[setupRound]]: reshuffle + draw harvesting sector & target sietch). `rng` is injectable.
+ */
+export function startNextRound(s: GameState, rng: () => number = Math.random): NextRoundResult {
+  const supremacy = Math.min(SUPREMACY_WIN, s.tracks.supremacy + SUPREMACY_PER_ROUND);
+  const ended: GameState = {
+    ...s,
+    round: s.round + 1,
+    tracks: { ...s.tracks, supremacy },
+  };
   return {
-    state: {
-      ...s,
-      round: s.round + 1,
-      phase: 'vehicle_placement',
-      tracks: { ...s.tracks, supremacy },
-      harvestingSector,
-      targetSietchId,
-    },
+    state: setupRound(ended, rng),
     harkonnenWins: supremacy >= SUPREMACY_WIN,
   };
 }

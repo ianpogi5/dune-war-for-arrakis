@@ -9,7 +9,7 @@ import {
   TOP_ROW,
   BOTTOM_ROW,
 } from '../engine/spiceMustFlow';
-import { startNextRound, SUPREMACY_WIN, PHASE_ORDER, nextPhase } from '../engine/round';
+import { setupRound, startNextRound, SUPREMACY_WIN, PHASE_ORDER, nextPhase } from '../engine/round';
 import {
   beginBattle,
   battleRoundSetup,
@@ -156,7 +156,11 @@ function HelpPanel() {
 function RoundPanel({ s, onChange }: { s: GameState; onChange: (next: GameState) => void }) {
   const avail = availability(s.spice.markers);
   const won = s.tracks.supremacy >= SUPREMACY_WIN;
+  // At the 'start' phase (a fresh game's round 1) the current round hasn't been set up yet — just
+  // draw its tactical cards, without ending a round (no supremacy gain, no round increment).
+  const needsSetup = s.phase === 'start';
 
+  const beginRound = () => onChange(setupRound(s));
   const nextRound = () => {
     const { state, harkonnenWins } = startNextRound(s);
     onChange(state);
@@ -191,9 +195,15 @@ function RoundPanel({ s, onChange }: { s: GameState; onChange: (next: GameState)
         <dt>Active imperium bans</dt>
         <dd>{s.spice.activeBans.length ? s.spice.activeBans.join(', ') : 'none'}</dd>
       </dl>
-      <button className="confirm-btn" onClick={nextRound} disabled={won}>
-        Start next round
-      </button>
+      {needsSetup ? (
+        <button className="confirm-btn" onClick={beginRound}>
+          Begin round {s.round}
+        </button>
+      ) : (
+        <button className="confirm-btn" onClick={nextRound} disabled={won}>
+          Start next round
+        </button>
+      )}
     </section>
   );
 }
@@ -913,7 +923,7 @@ const PHASE_LABEL: Record<RoundPhase, string> = {
 };
 
 const PHASE_GUIDE: Record<RoundPhase, string> = {
-  start: 'Round setup: draw planning + prescience cards and the harvesting-sector & target-sietch tactical cards. "Start next round" does this for you.',
+  start: 'Round setup: draw planning + prescience cards and the harvesting-sector & target-sietch tactical cards. "Begin round" in This round draws the tactical cards for you (no supremacy gain — that comes at the end of the round).',
   vehicle_placement: 'Place the Harkonnen vehicles — see the Vehicle placement panel.',
   action_resolution: 'Alternate turns. Roll the Harkonnen action die and resolve it (Resolve Harkonnen turn), playing cards/leader abilities as they come up. Resolve any battles in the Battle panel.',
   desert_hazards: 'Place & resolve wormsigns, then roll Coriolis storms for exposed Harkonnen legions (Coriolis Storms panel).',
