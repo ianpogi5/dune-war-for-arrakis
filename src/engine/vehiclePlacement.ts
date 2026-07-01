@@ -135,11 +135,16 @@ function occupiedZones(s: GameState): Set<string> {
   );
 }
 
-/** How many of the given harvester areas an air zone protects (member areas it covers). */
+/**
+ * How many harvesters an air zone protects. An air zone straddles 2 Sectors and is "connected to
+ * all Areas within both Sectors" (rulebook), so a carryall there can save any harvester in either
+ * bordering Sector — not just the zone's few member Areas.
+ */
 function harvestersProtected(zoneId: string, harvesterAreas: Set<string>): number {
-  const zone = AIR_ZONES.find((z) => z.id === zoneId);
-  if (!zone) return 0;
-  return zone.areas.filter((a) => harvesterAreas.has(a)).length;
+  const covered = new Set(airZoneSectors(zoneId).flatMap((sec) => areasInSector(sec)));
+  let n = 0;
+  for (const a of covered) if (harvesterAreas.has(a)) n++;
+  return n;
 }
 
 /**

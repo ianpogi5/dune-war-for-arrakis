@@ -113,21 +113,22 @@ describe('placeHarvesters', () => {
 });
 
 describe('placeCarryalls', () => {
-  it('picks the unoccupied zones protecting the most harvesters', () => {
-    // az5 members: false_wall_south, hobars_gap, s2_8 ; az6: s6_4, s7_5, s7_6
-    const harvesters = ['hobars_gap', 's2_8', 's7_6']; // az5 protects 2, az6 protects 1
+  it('picks the unoccupied zone protecting the most harvesters (whole sectors, not just member areas)', () => {
+    // az5 straddles s6+s2; az4 (s5+s6) and az6 (s6+s7) also touch s6. s6_4/s6_5 are in s6,
+    // s2_8 is in s2 (only az5 reaches it) → az5 protects 3, the others 2.
+    const harvesters = ['s6_4', 's6_5', 's2_8'];
     const got = placeCarryalls(state(), 1, harvesters);
     expect(got).toEqual(['az5']);
   });
 
   it('skips zones protecting no harvesters and respects count', () => {
-    const got = placeCarryalls(state(), 5, ['hobars_gap']); // only az5 protects any
+    const got = placeCarryalls(state(), 5, ['s2_8']); // only az5 connects to sector s2
     expect(got).toEqual(['az5']);
   });
 
   it('does not reuse an already-occupied zone', () => {
     const s = state({ vehicles: [{ type: 'carryall', location: 'az5' }] });
-    const got = placeCarryalls(s, 1, ['hobars_gap', 's2_8']);
+    const got = placeCarryalls(s, 1, ['s2_8']); // only az5 covers it, and it's taken
     expect(got).not.toContain('az5');
   });
 });
