@@ -4,11 +4,15 @@
 //
 // Used by cardEffects.ts (planning cards) and leaderEffects.ts (named-leader specials).
 
-import type { GameState, PlanningDeck, UnitType, VehicleType } from './state';
-import { emptyLegion } from './state';
-import { upsertLegion } from './applyAction';
-import { placeHarvesters, placeCarryalls, placeOrnithopters } from './vehiclePlacement';
-import { areaLabel } from './describeArea';
+import type { GameState, PlanningDeck, UnitType, VehicleType } from "./state";
+import { emptyLegion } from "./state";
+import { upsertLegion } from "./applyAction";
+import {
+  placeHarvesters,
+  placeCarryalls,
+  placeOrnithopters,
+} from "./vehiclePlacement";
+import { areaLabel } from "./describeArea";
 
 export interface EffectStep {
   /** Human-readable directive for this step. */
@@ -28,16 +32,16 @@ export interface EffectResolution {
 }
 
 const DECK_LABEL: Record<PlanningDeck, string> = {
-  house_harkonnen: 'House Harkonnen',
-  corrino_ally: 'Corrino Ally',
-  house_atreides: 'House Atreides',
-  fremen_ally: 'Fremen Ally',
+  house_harkonnen: "House Harkonnen",
+  corrino_ally: "Corrino Ally",
+  house_atreides: "House Atreides",
+  fremen_ally: "Fremen Ally",
 };
 
 const UNIT_LABEL: Record<UnitType, [string, string]> = {
-  regular: ['Regular Unit', 'Regular Units'],
-  elite: ['Elite Unit', 'Elite Units'],
-  special_elite: ['Sardaukar Unit', 'Sardaukar Units'],
+  regular: ["Regular Unit", "Regular Units"],
+  elite: ["Elite Unit", "Elite Units"],
+  special_elite: ["Sardaukar Unit", "Sardaukar Units"],
 };
 
 export function fmtUnits(units: Partial<Record<UnitType, number>>): string {
@@ -46,19 +50,22 @@ export function fmtUnits(units: Partial<Record<UnitType, number>>): string {
     const n = units[t] ?? 0;
     if (n > 0) parts.push(`${n} ${UNIT_LABEL[t][n === 1 ? 0 : 1]}`);
   });
-  return parts.join(' and ');
+  return parts.join(" and ");
 }
 
 // --- step builders ---------------------------------------------------------
 
 /** Place a fixed mix of Harkonnen units in a known area, drawn from the reserve. Auto. */
-export function placeUnits(units: Partial<Record<UnitType, number>>, area: string): EffectStep {
+export function placeUnits(
+  units: Partial<Record<UnitType, number>>,
+  area: string,
+): EffectStep {
   return {
     text: `Place ${fmtUnits(units)} in ${areaLabel(area)}.`,
     auto: true,
     apply: (s) => {
       const reserve = { ...s.harkonnenReserve.units };
-      const add = emptyLegion('harkonnen', area);
+      const add = emptyLegion("harkonnen", area);
       (Object.keys(units) as UnitType[]).forEach((t) => {
         const n = Math.min(units[t] ?? 0, reserve[t]);
         add.units[t] = n;
@@ -74,7 +81,11 @@ export function placeUnits(units: Partial<Record<UnitType, number>>, area: strin
 }
 
 /** Place 1 unit of one type in each of several fixed areas. Auto. */
-export function placeOneEach(type: UnitType, areas: string[], label: string): EffectStep {
+export function placeOneEach(
+  type: UnitType,
+  areas: string[],
+  label: string,
+): EffectStep {
   return {
     text: `Place 1 ${UNIT_LABEL[type][0]} in ${label}.`,
     auto: true,
@@ -83,35 +94,46 @@ export function placeOneEach(type: UnitType, areas: string[], label: string): Ef
       const reserve = { ...s.harkonnenReserve.units };
       for (const area of areas) {
         if (reserve[type] <= 0) break;
-        const add = emptyLegion('harkonnen', area);
+        const add = emptyLegion("harkonnen", area);
         add.units[type] = 1;
         reserve[type] -= 1;
         legions = upsertLegion(legions, add);
       }
-      return { ...s, legions, harkonnenReserve: { ...s.harkonnenReserve, units: reserve } };
+      return {
+        ...s,
+        legions,
+        harkonnenReserve: { ...s.harkonnenReserve, units: reserve },
+      };
     },
   };
 }
 
 /** Place vehicles via the placement engine (it picks the board spots). Auto. */
-export function placeVehicles(counts: Partial<Record<VehicleType, number>>): EffectStep {
+export function placeVehicles(
+  counts: Partial<Record<VehicleType, number>>,
+): EffectStep {
   const desc = (Object.keys(counts) as VehicleType[])
     .filter((t) => (counts[t] ?? 0) > 0)
-    .map((t) => `${counts[t]} ${t}${(counts[t] ?? 0) === 1 ? '' : 's'}`)
-    .join(' and ');
+    .map((t) => `${counts[t]} ${t}${(counts[t] ?? 0) === 1 ? "" : "s"}`)
+    .join(" and ");
   return {
-    text: `Place ${desc} on the board (at the positions shown above).`,
+    text: `Place ${desc} on the board (positions are calculated automatically by the placement algorithm).`,
     auto: true,
     apply: (s) => {
       const vehicles = [...s.vehicles];
       const newHarvesters = placeHarvesters(s, counts.harvester ?? 0);
-      for (const loc of newHarvesters) vehicles.push({ type: 'harvester', location: loc });
+      for (const loc of newHarvesters)
+        vehicles.push({ type: "harvester", location: loc });
       const harvesterAreas = [
-        ...s.vehicles.filter((v) => v.type === 'harvester').map((v) => v.location),
+        ...s.vehicles
+          .filter((v) => v.type === "harvester")
+          .map((v) => v.location),
         ...newHarvesters,
       ];
-      for (const loc of placeCarryalls(s, counts.carryall ?? 0, harvesterAreas)) vehicles.push({ type: 'carryall', location: loc });
-      for (const loc of placeOrnithopters(s, counts.ornithopter ?? 0)) vehicles.push({ type: 'ornithopter', location: loc });
+      for (const loc of placeCarryalls(s, counts.carryall ?? 0, harvesterAreas))
+        vehicles.push({ type: "carryall", location: loc });
+      for (const loc of placeOrnithopters(s, counts.ornithopter ?? 0))
+        vehicles.push({ type: "ornithopter", location: loc });
       return { ...s, vehicles };
     },
   };
@@ -120,11 +142,17 @@ export function placeVehicles(counts: Partial<Record<VehicleType, number>>): Eff
 /** Draw N cards from a planning deck (decrements the draw pile). Auto. */
 export function draw(deck: PlanningDeck, count: number): EffectStep {
   return {
-    text: `Draw ${count} ${DECK_LABEL[deck]} Planning card${count === 1 ? '' : 's'}.`,
+    text: `Draw ${count} ${DECK_LABEL[deck]} Planning card${count === 1 ? "" : "s"}.`,
     auto: true,
     apply: (s) => {
       const n = Math.min(count, s.decks.planning[deck]);
-      return { ...s, decks: { ...s.decks, planning: { ...s.decks.planning, [deck]: s.decks.planning[deck] - n } } };
+      return {
+        ...s,
+        decks: {
+          ...s.decks,
+          planning: { ...s.decks.planning, [deck]: s.decks.planning[deck] - n },
+        },
+      };
     },
   };
 }
@@ -136,5 +164,8 @@ export function manual(text: string): EffectStep {
 
 /** Apply every auto step in order, returning the resulting state. */
 export function applyEffectSteps(s: GameState, steps: EffectStep[]): GameState {
-  return steps.reduce((acc, step) => (step.auto && step.apply ? step.apply(acc) : acc), s);
+  return steps.reduce(
+    (acc, step) => (step.auto && step.apply ? step.apply(acc) : acc),
+    s,
+  );
 }
