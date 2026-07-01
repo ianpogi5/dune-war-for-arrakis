@@ -74,6 +74,41 @@ const DESERT_AREAS = SORTED_AREAS.filter(isDesertArea);
 
 const clamp = (n: number, lo: number, hi: number) => Math.max(lo, Math.min(hi, n));
 
+/**
+ * Numeric field that keeps its display clean. Selecting on focus makes typing replace the value
+ * (so you get "3", not "03"), the value is clamped to [min,max], and the shown text is
+ * re-normalized on blur — React skips the DOM update when the parsed value is unchanged, which
+ * would otherwise leave a stray leading zero behind.
+ */
+function NumInput({
+  value,
+  min,
+  max,
+  onChange,
+  className,
+}: {
+  value: number;
+  min: number;
+  max: number;
+  onChange: (n: number) => void;
+  className?: string;
+}) {
+  return (
+    <input
+      type="number"
+      className={className}
+      min={min}
+      max={max}
+      value={value}
+      onFocus={(e) => e.currentTarget.select()}
+      onChange={(e) => onChange(clamp(Number(e.target.value), min, max))}
+      onBlur={(e) => {
+        e.currentTarget.value = String(value);
+      }}
+    />
+  );
+}
+
 function countLeaders(l: Legion): { generic: number; named: number } {
   return {
     generic: l.leaders.filter((x) => x.kind === 'generic').length,
@@ -216,13 +251,7 @@ export function StateEditor({
         {IMPERIUM.map(({ key, label }) => (
           <label key={key}>
             {label}
-            <input
-              type="number"
-              min={1}
-              max={5}
-              value={s.spice.markers[key]}
-              onChange={(e) => setMarker(key, Number(e.target.value))}
-            />
+            <NumInput min={1} max={5} value={s.spice.markers[key]} onChange={(n) => setMarker(key, n)} />
           </label>
         ))}
       </div>
@@ -294,27 +323,25 @@ export function StateEditor({
         {UNIT_TYPES.map(({ key, label }) => (
           <label key={key}>
             {label}
-            <input type="number" min={0} max={16} value={r.units[key]} onChange={(e) => setReserveUnit(key, Number(e.target.value))} />
+            <NumInput min={0} max={16} value={r.units[key]} onChange={(n) => setReserveUnit(key, n)} />
           </label>
         ))}
         <label>
           Deploy tokens
-          <input
-            type="number"
+          <NumInput
             min={0}
             max={12}
             value={r.deploymentTokens}
-            onChange={(e) => onChange({ ...s, harkonnenReserve: { ...r, deploymentTokens: clamp(Number(e.target.value), 0, 12) } })}
+            onChange={(n) => onChange({ ...s, harkonnenReserve: { ...r, deploymentTokens: n } })}
           />
         </label>
         <label>
           Bashars
-          <input
-            type="number"
+          <NumInput
             min={0}
             max={6}
             value={r.bashars}
-            onChange={(e) => onChange({ ...s, harkonnenReserve: { ...r, bashars: clamp(Number(e.target.value), 0, 6) } })}
+            onChange={(n) => onChange({ ...s, harkonnenReserve: { ...r, bashars: n } })}
           />
         </label>
       </div>
@@ -394,28 +421,28 @@ export function StateEditor({
                 ))}
               </select>
               {pickBtn({ kind: 'legion', index: i })}
-              {UNIT_TYPES.map(({ key, label }) => (
-                <label key={key} className="mini">
-                  {label}
-                  <input
-                    type="number"
+              <div className="legion-units">
+                {UNIT_TYPES.map(({ key, label }) => (
+                  <label key={key} className="mini">
+                    {label}
+                    <NumInput
+                      min={0}
+                      max={6}
+                      value={l.units[key]}
+                      onChange={(n) => updateLegion(i, { ...l, units: { ...l.units, [key]: n } })}
+                    />
+                  </label>
+                ))}
+                <label className="mini">
+                  Gen
+                  <NumInput
                     min={0}
-                    max={6}
-                    value={l.units[key]}
-                    onChange={(e) => updateLegion(i, { ...l, units: { ...l.units, [key]: clamp(Number(e.target.value), 0, 6) } })}
+                    max={4}
+                    value={lead.generic}
+                    onChange={(n) => updateLegion(i, { ...l, leaders: setGenericLeaders(l, n) })}
                   />
                 </label>
-              ))}
-              <label className="mini">
-                Gen
-                <input
-                  type="number"
-                  min={0}
-                  max={4}
-                  value={lead.generic}
-                  onChange={(e) => updateLegion(i, { ...l, leaders: setGenericLeaders(l, clamp(Number(e.target.value), 0, 4)) })}
-                />
-              </label>
+              </div>
               {l.faction === 'harkonnen' ? (
                 <label className="mini grow">
                   Named
@@ -427,12 +454,11 @@ export function StateEditor({
               ) : (
                 <label className="mini">
                   Named
-                  <input
-                    type="number"
+                  <NumInput
                     min={0}
                     max={4}
                     value={lead.named}
-                    onChange={(e) => updateLegion(i, { ...l, leaders: makeLeaders(l.faction, lead.generic, clamp(Number(e.target.value), 0, 4)) })}
+                    onChange={(n) => updateLegion(i, { ...l, leaders: makeLeaders(l.faction, lead.generic, n) })}
                   />
                 </label>
               )}
