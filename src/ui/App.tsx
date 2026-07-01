@@ -315,21 +315,21 @@ function CardPanel({ s, onApply }: { s: GameState; onApply: (next: GameState) =>
       <select className="card-select" value={sel} onChange={(e) => setSel(e.target.value)}>
         <option value="">— pick a card or leader ability —</option>
         <optgroup label="House Harkonnen cards">
-          {HOUSE_HARKONNEN_CARDS.map((c) => (
+          {HOUSE_HARKONNEN_CARDS.slice().sort((a, b) => cardLabel(a).localeCompare(cardLabel(b))).map((c) => (
             <option key={c.id} value={`card:${c.id}`}>
               {cardLabel(c)}
             </option>
           ))}
         </optgroup>
         <optgroup label="Corrino Ally cards">
-          {CORRINO_ALLY_CARDS.map((c) => (
+          {CORRINO_ALLY_CARDS.slice().sort((a, b) => cardLabel(a).localeCompare(cardLabel(b))).map((c) => (
             <option key={c.id} value={`card:${c.id}`}>
               {cardLabel(c)}
             </option>
           ))}
         </optgroup>
         <optgroup label="Named-leader specials">
-          {NAMED_LEADERS.map((l) => (
+          {NAMED_LEADERS.slice().sort((a, b) => a.name.localeCompare(b.name)).map((l) => (
             <option key={l.name} value={`leader:${l.name}`}>
               {l.name}
             </option>
