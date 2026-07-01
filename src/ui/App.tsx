@@ -811,14 +811,23 @@ function BoardMapPanel({
     onClose();
   };
 
-  // Wormsigns & sandworms have terrain + occupancy rules; valid targets stay clickable, others dim.
+  // Some picks restrict which areas are valid: wormsigns/sandworms by terrain + occupancy, and the
+  // target sietch must be a live sietch. Valid areas stay clickable; the rest dim.
   const wormPick = pick?.kind === 'wormsign' || pick?.kind === 'sandworm';
   const selectable =
     pick?.kind === 'wormsign'
       ? (id: string) => canPlaceWormsign(s, id)
       : pick?.kind === 'sandworm'
         ? (id: string) => canPlaceSandworm(s, id)
-        : undefined;
+        : pick?.kind === 'target'
+          ? (id: string) => s.sietches.some((si) => si.area === id && !si.destroyed)
+          : undefined;
+  // Hint shown in the pick banner describing what's selectable.
+  const pickHint = wormPick
+    ? ' Only valid Desert areas are highlighted; the rest are dimmed.'
+    : pick?.kind === 'target'
+      ? ' Only sietches (not destroyed) are selectable; the rest are dimmed.'
+      : '';
 
   const onMapSelect = (id: string) => {
     if (!pick) {
@@ -864,7 +873,7 @@ function BoardMapPanel({
             {pick && (
               <div className="map-pick-banner">
                 Click an area to set <strong>{pickWhat}</strong>.
-                {wormPick && ' Only valid Desert areas are highlighted; the rest are dimmed.'}
+                {pickHint}
                 <button className="die" onClick={closeOverlay}>Cancel</button>
               </div>
             )}
