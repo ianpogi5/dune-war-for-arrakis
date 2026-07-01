@@ -21,7 +21,6 @@ import { resolveCombatRoll, type RawRoll } from '../engine/combatRoll';
 import { commitBattle } from '../engine/battleApply';
 import { revealDeploymentTokens } from '../engine/revealTokens';
 import { combatDiceDiscardBanned } from '../engine/imperiumBans';
-import { placeVehicles } from '../engine/vehiclePlacement';
 import { resolveCardPlay } from '../engine/cardEffects';
 import { resolveLeaderSpecial } from '../engine/leaderEffects';
 import { applyEffectSteps } from '../engine/effectSteps';
@@ -209,26 +208,6 @@ function RoundPanel({ s, onChange }: { s: GameState; onChange: (next: GameState)
 }
 
 function VehiclePanel({ s, onChange }: { s: GameState; onChange: (next: GameState) => void }) {
-  const avail = availability(s.spice.markers);
-  const placement = useMemo(
-    () =>
-      placeVehicles(s, {
-        harvesters: avail.harvesters,
-        carryalls: avail.carryalls,
-        ornithopters: avail.ornithopters,
-      }),
-    [s, avail.harvesters, avail.carryalls, avail.ornithopters],
-  );
-
-  const applyPlacement = () => {
-    const newVehicles: import('../engine/state').Vehicle[] = [
-      ...placement.harvesters.map((loc) => ({ type: 'harvester' as const, location: loc })),
-      ...placement.carryalls.map((loc) => ({ type: 'carryall' as const, location: loc })),
-      ...placement.ornithopters.map((loc) => ({ type: 'ornithopter' as const, location: loc })),
-    ];
-    onChange({ ...s, vehicles: newVehicles });
-  };
-
   const removeVehicle = (v: import('../engine/state').Vehicle) =>
     onChange({ ...s, vehicles: s.vehicles.filter((x) => x !== v) });
 
@@ -246,11 +225,10 @@ function VehiclePanel({ s, onChange }: { s: GameState; onChange: (next: GameStat
   return (
     <section className="panel">
       <h2>Vehicle placement</h2>
-      <p className="hint">Place vehicles on the board, then tap Apply. Remove any vehicle destroyed by an Atreides legion or sandworm.</p>
+      <p className="hint">Remove any vehicle destroyed by an Atreides legion or sandworm.</p>
       {harvesters.length > 0 && <p><strong>Harvesters:</strong>{' '}{harvesters.map(renderRemovable)}</p>}
       {carryalls.length > 0 && <p><strong>Carryalls:</strong>{' '}{carryalls.map(renderRemovable)}</p>}
       {ornithopters.length > 0 && <p><strong>Ornithopters:</strong>{' '}{ornithopters.map(renderRemovable)}</p>}
-      <button className="confirm-btn" onClick={applyPlacement}>Apply placement</button>
     </section>
   );
 }

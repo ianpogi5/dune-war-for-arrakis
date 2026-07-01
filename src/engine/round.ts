@@ -12,7 +12,10 @@ import type {
   RoundPhase,
   TacticalCard,
   TacticalSector,
+  Vehicle,
 } from "./state";
+import { availability } from "./spiceMustFlow";
+import { placeVehicles } from "./vehiclePlacement";
 
 // ---------------------------------------------------------------------------
 // Sectors: the 4 sectors adjacent to the North Pole are "central" and a tactical
@@ -190,7 +193,35 @@ export function setupRound(
     // No eligible target (e.g. few sietches left) — leave target unset for the player to pick.
   }
 
-  return { ...s, phase: "vehicle_placement", harvestingSector, targetSietchId };
+  const roundState: GameState = {
+    ...s,
+    phase: "vehicle_placement",
+    harvestingSector,
+    targetSietchId,
+  };
+
+  // Auto-place vehicles for this round so s.vehicles is the single source of truth.
+  const avail = availability(roundState.spice.markers);
+  const placement = placeVehicles(roundState, {
+    harvesters: avail.harvesters,
+    carryalls: avail.carryalls,
+    ornithopters: avail.ornithopters,
+  });
+  const vehicles: Vehicle[] = [
+    ...placement.harvesters.map((loc) => ({
+      type: "harvester" as const,
+      location: loc,
+    })),
+    ...placement.carryalls.map((loc) => ({
+      type: "carryall" as const,
+      location: loc,
+    })),
+    ...placement.ornithopters.map((loc) => ({
+      type: "ornithopter" as const,
+      location: loc,
+    })),
+  ];
+  return { ...roundState, vehicles };
 }
 
 /**
