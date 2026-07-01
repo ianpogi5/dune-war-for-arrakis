@@ -208,7 +208,7 @@ function RoundPanel({ s, onChange }: { s: GameState; onChange: (next: GameState)
   );
 }
 
-function VehiclePanel({ s, onChange }: { s: GameState; onChange: (next: GameState) => void }) {
+function VehiclePanel({ s, onChange, showSuggestions }: { s: GameState; onChange: (next: GameState) => void; showSuggestions?: boolean }) {
   const avail = availability(s.spice.markers);
   const placement = useMemo(
     () =>
@@ -229,7 +229,7 @@ function VehiclePanel({ s, onChange }: { s: GameState; onChange: (next: GameStat
   return (
     <section className="panel">
       <h2>Vehicles</h2>
-      {(placement.harvesters.length > 0 || placement.carryalls.length > 0 || placement.ornithopters.length > 0) && (
+      {showSuggestions && (placement.harvesters.length > 0 || placement.carryalls.length > 0 || placement.ornithopters.length > 0) && (
         <>
           <p className="hint">Where to place the Harkonnen vehicles on the board this round.</p>
           <p><strong>Place harvesters:</strong> <AreaChips ids={placement.harvesters} /></p>
@@ -239,7 +239,7 @@ function VehiclePanel({ s, onChange }: { s: GameState; onChange: (next: GameStat
       )}
       {(harvesters.length > 0 || carryalls.length > 0 || ornithopters.length > 0) && (
         <>
-          <p className="hint">Currently on the board. Remove a harvester when an Atreides legion moves onto it.</p>
+          <p className="hint">Currently on the board. Remove a harvester when an Atreides legion or sandworm moves onto it.</p>
           {harvesters.length > 0 && (
             <p><strong>Harvesters:</strong>{' '}
               {harvesters.map((v, i) => (
@@ -1347,7 +1347,7 @@ export function App() {
         <StateEditor s={s} onChange={setS} onPick={setPick} pick={pick} />
         <RoundPanel s={s} onChange={commit} />
         <PhasePanel s={s} onChange={setS} showAll={showAllPanels} onToggleShowAll={setShowAllPanels} />
-        {(inPhase('vehicle_placement') || inPhase('action_resolution')) && <VehiclePanel s={s} onChange={commit} />}
+        {(inPhase('vehicle_placement') || inPhase('action_resolution')) && <VehiclePanel s={s} onChange={commit} showSuggestions={inPhase('vehicle_placement')} />}
         {inPhase('action_resolution') && <ResolvePanel s={s} onApply={commit} />}
         {inPhase('action_resolution') && <BattlePanel s={s} onApply={commit} />}
         {inPhase('action_resolution') && <CardPanel s={s} onApply={commit} />}
