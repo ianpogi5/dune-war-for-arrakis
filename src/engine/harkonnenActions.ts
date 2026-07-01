@@ -6,9 +6,9 @@
 // and its supporting state accessors. MENTAT/DEPLOYMENT/HOUSE and the full movement tie-breakers
 // build on these primitives in later passes.
 
-import type { GameState, Legion, UnitType, ActionResult } from './state';
-import { combatPower } from './combatPower';
-import { unitCount } from './state';
+import type { GameState, Legion, UnitType, ActionResult } from "./state";
+import { combatPower } from "./combatPower";
+import { unitCount } from "./state";
 import {
   harkonnenAreAdjacent,
   harkonnenNeighbors,
@@ -16,29 +16,35 @@ import {
   canTroopTransport,
   harkonnenDistance,
   nearestByDistance,
-} from './movement';
-import { AREAS } from './board';
-import { stackingLimit } from './imperiumBans';
+} from "./movement";
+import { AREAS } from "./board";
+import { stackingLimit } from "./imperiumBans";
 
 // ---------------------------------------------------------------------------
 // State accessors
 // ---------------------------------------------------------------------------
 
 export function harkonnenLegions(s: GameState): Legion[] {
-  return s.legions.filter((l) => l.faction === 'harkonnen');
+  return s.legions.filter((l) => l.faction === "harkonnen");
 }
 
 export function atreidesLegions(s: GameState): Legion[] {
-  return s.legions.filter((l) => l.faction === 'atreides');
+  return s.legions.filter((l) => l.faction === "atreides");
 }
 
-export function legionAt(s: GameState, area: string, faction: Legion['faction']): Legion | undefined {
+export function legionAt(
+  s: GameState,
+  area: string,
+  faction: Legion["faction"],
+): Legion | undefined {
   return s.legions.find((l) => l.faction === faction && l.area === area);
 }
 
 /** Air-zone ids currently holding an ornithopter. */
 export function ornithopterZones(s: GameState): string[] {
-  return s.vehicles.filter((v) => v.type === 'ornithopter').map((v) => v.location);
+  return s.vehicles
+    .filter((v) => v.type === "ornithopter")
+    .map((v) => v.location);
 }
 
 /** Areas a legion cannot move *through* (enemy-occupied or sandworm). Harvesters/stations don't block. */
@@ -47,11 +53,12 @@ export function blockedForHarkonnen(s: GameState): (area: string) => boolean {
   const settlements = new Set<string>(); // Atreides settlements = sietches
   for (const si of s.sietches) if (!si.destroyed) settlements.add(si.area);
   const worms = new Set(s.sandworms.map((w) => w.area));
-  return (area: string) => enemy.has(area) || settlements.has(area) || worms.has(area);
+  return (area: string) =>
+    enemy.has(area) || settlements.has(area) || worms.has(area);
 }
 
 function leaderRank(l: Legion): number {
-  return l.leaders.some((x) => x.kind === 'named') ? 1 : 0;
+  return l.leaders.some((x) => x.kind === "named") ? 1 : 0;
 }
 
 function sietchRank(s: GameState, area: string): number {
@@ -62,8 +69,8 @@ function sietchRank(s: GameState, area: string): number {
 /** The Atreides legion defending a sietch area (empty legion if none present). */
 function sietchDefender(s: GameState, area: string): Legion {
   return (
-    legionAt(s, area, 'atreides') ?? {
-      faction: 'atreides',
+    legionAt(s, area, "atreides") ?? {
+      faction: "atreides",
       area,
       units: { regular: 0, elite: 0, special_elite: 0 },
       deploymentTokens: 0,
@@ -84,14 +91,19 @@ export interface DeployPlacement {
 }
 
 export type HarkonnenAction =
-  | { kind: 'attack_sietch'; attacker: string; sietch: string; useOrnithopter: boolean }
-  | { kind: 'attack_legion'; attacker: string; defender: string }
-  | { kind: 'move'; legion: string; path: string[] }
-  | { kind: 'deploy'; placements: DeployPlacement[] }
-  | { kind: 'mentat' } // draw 2 planning cards (alternating Harkonnen/Corrino) and play immediately
-  | { kind: 'house_replace'; legion: string; count: number } // replace `count` regulars with elites
-  | { kind: 'house_place_vehicles' } // place 1 harvester + 1 ornithopter (per vehicle rules)
-  | { kind: 'none'; reason: string };
+  | {
+      kind: "attack_sietch";
+      attacker: string;
+      sietch: string;
+      useOrnithopter: boolean;
+    }
+  | { kind: "attack_legion"; attacker: string; defender: string }
+  | { kind: "move"; legion: string; path: string[] }
+  | { kind: "deploy"; placements: DeployPlacement[] }
+  | { kind: "mentat" } // draw 2 planning cards (alternating Harkonnen/Corrino) and play immediately
+  | { kind: "house_replace"; legion: string; count: number } // replace `count` regulars with elites
+  | { kind: "house_place_vehicles" } // place 1 harvester + 1 ornithopter (per vehicle rules)
+  | { kind: "none"; reason: string };
 
 // ---------------------------------------------------------------------------
 // 1. Attack a sietch
@@ -112,16 +124,26 @@ interface SietchAttackOption {
  *   1. highest sietch rank · 2. greatest combat-power difference · 3. no ornithopter needed ·
  *   4. the round's target sietch.
  */
-export function selectSietchAttack(s: GameState, requireLeader = false): HarkonnenAction | null {
-  const attackers = harkonnenLegions(s).filter((l) => (requireLeader ? l.leaders.length > 0 : true));
+export function selectSietchAttack(
+  s: GameState,
+  requireLeader = false,
+): HarkonnenAction | null {
+  const attackers = harkonnenLegions(s).filter((l) =>
+    requireLeader ? l.leaders.length > 0 : true,
+  );
   const options: SietchAttackOption[] = [];
 
   for (const attacker of attackers) {
-    const transport = canTroopTransport(AREAS[attacker.area].sector, ornithopterZones(s));
+    const transport = canTroopTransport(
+      AREAS[attacker.area].sector,
+      ornithopterZones(s),
+    );
     for (const si of s.sietches) {
       if (si.destroyed) continue;
       const adjacent = harkonnenAreAdjacent(attacker.area, si.area);
-      const reachable = adjacent || (transport && withinAttackReach(attacker.area, si.area, true));
+      const reachable =
+        adjacent ||
+        (transport && withinAttackReach(attacker.area, si.area, true));
       if (!reachable) continue;
       const defender = sietchDefender(s, si.area);
       const cpDiff = combatPower(attacker) - combatPower(defender);
@@ -148,7 +170,7 @@ export function selectSietchAttack(s: GameState, requireLeader = false): Harkonn
 
   const best = options[0];
   return {
-    kind: 'attack_sietch',
+    kind: "attack_sietch",
     attacker: best.attacker.area,
     sietch: best.sietchArea,
     useOrnithopter: best.useOrnithopter,
@@ -164,29 +186,43 @@ export function selectSietchAttack(s: GameState, requireLeader = false): Harkonn
  * in solo, so only ground-adjacent targets count, and the attacker must be strictly stronger.
  * Target priority: 1. highest combat power · 2. contains a named leader.
  */
-export function selectLegionAttack(s: GameState, requireLeader = false): HarkonnenAction | null {
-  const attackers = harkonnenLegions(s).filter((l) => (requireLeader ? l.leaders.length > 0 : true));
+export function selectLegionAttack(
+  s: GameState,
+  requireLeader = false,
+): HarkonnenAction | null {
+  const attackers = harkonnenLegions(s).filter((l) =>
+    requireLeader ? l.leaders.length > 0 : true,
+  );
   const targets = atreidesLegions(s);
 
   let bestTarget: Legion | null = null;
   let bestAttacker: Legion | null = null;
   for (const target of targets) {
     const eligible = attackers.filter(
-      (a) => harkonnenAreAdjacent(a.area, target.area) && combatPower(a) > combatPower(target),
+      (a) =>
+        harkonnenAreAdjacent(a.area, target.area) &&
+        combatPower(a) > combatPower(target),
     );
     if (eligible.length === 0) continue;
     if (
       !bestTarget ||
       combatPower(target) > combatPower(bestTarget) ||
-      (combatPower(target) === combatPower(bestTarget) && leaderRank(target) > leaderRank(bestTarget))
+      (combatPower(target) === combatPower(bestTarget) &&
+        leaderRank(target) > leaderRank(bestTarget))
     ) {
       bestTarget = target;
       // attacker = strongest eligible (any on tie)
-      bestAttacker = eligible.reduce((m, a) => (combatPower(a) > combatPower(m) ? a : m));
+      bestAttacker = eligible.reduce((m, a) =>
+        combatPower(a) > combatPower(m) ? a : m,
+      );
     }
   }
   if (!bestTarget || !bestAttacker) return null;
-  return { kind: 'attack_legion', attacker: bestAttacker.area, defender: bestTarget.area };
+  return {
+    kind: "attack_legion",
+    attacker: bestAttacker.area,
+    defender: bestTarget.area,
+  };
 }
 
 // ---------------------------------------------------------------------------
@@ -196,13 +232,15 @@ export function selectLegionAttack(s: GameState, requireLeader = false): Harkonn
 /**
  * The sietch the Harkonnen move toward this turn. Normally the round's target sietch, but if no
  * Harkonnen legion can beat its defender, a temporary target is chosen (a beatable live sietch
- * closest to the real target, then highest rank). Null if no sietch is a valid movement goal.
+ * closest to the real target, then highest rank). Falls back to the round's target sietch if no
+ * beatable alternative exists, so legions always advance. Null only if no target sietch is set.
  */
 export function effectiveTarget(s: GameState): string | null {
   const t = s.targetSietchId;
   if (!t) return null;
   const legs = harkonnenLegions(s);
-  const beatable = (area: string) => legs.some((l) => combatPower(l) > combatPower(sietchDefender(s, area)));
+  const beatable = (area: string) =>
+    legs.some((l) => combatPower(l) > combatPower(sietchDefender(s, area)));
   if (beatable(t)) return t;
   const cands = s.sietches
     .filter((si) => !si.destroyed && si.area !== t && beatable(si.area))
@@ -211,13 +249,22 @@ export function effectiveTarget(s: GameState): string | null {
         harkonnenDistance(a.area, t) - harkonnenDistance(b.area, t) ||
         sietchRank(s, b.area) - sietchRank(s, a.area),
     );
-  return cands.length > 0 ? cands[0].area : null;
+  // If no beatable sietch exists yet, still advance toward the round's target sietch so that
+  // legions are never stranded — they build up forces for a future attack.
+  return cands.length > 0 ? cands[0].area : t;
 }
 
 /** Choose the next step from `from` toward `target` along a shortest path, by the 5 tie-breakers. */
-function pickNextStep(s: GameState, from: string, target: string): string | null {
+function pickNextStep(
+  s: GameState,
+  from: string,
+  target: string,
+): string | null {
   const blocked = blockedForHarkonnen(s);
-  const d = harkonnenDistance(from, target, { blocked, allowBlockedTarget: true });
+  const d = harkonnenDistance(from, target, {
+    blocked,
+    allowBlockedTarget: true,
+  });
   if (!isFinite(d) || d <= 0) return null;
   const worms = new Set(s.wormsigns.map((w) => w.area));
   const hByArea = new Map(harkonnenLegions(s).map((l) => [l.area, l] as const));
@@ -226,7 +273,8 @@ function pickNextStep(s: GameState, from: string, target: string): string | null
     (n) =>
       n !== target && // entering the target is an attack, not a move
       !blocked(n) &&
-      harkonnenDistance(n, target, { blocked, allowBlockedTarget: true }) === d - 1,
+      harkonnenDistance(n, target, { blocked, allowBlockedTarget: true }) ===
+        d - 1,
   );
   if (cands.length === 0) return null;
 
@@ -238,14 +286,20 @@ function pickNextStep(s: GameState, from: string, target: string): string | null
     const merge = here && unitCount(here) < limit ? 0 : 1;
     const sietchDist = distanceToNearestSietch(s, n).dist;
     const terr = AREAS[n].terrain;
-    const terrainRank = terr === 'mountain' ? 0 : terr === 'plateau' || terr === 'minor_erg' ? 1 : 2;
-    const wormPenalty = terr === 'desert' && worms.has(n) ? 1 : 0;
+    const terrainRank =
+      terr === "mountain"
+        ? 0
+        : terr === "plateau" || terr === "minor_erg"
+          ? 1
+          : 2;
+    const wormPenalty = terr === "desert" && worms.has(n) ? 1 : 0;
     return [merge, sietchDist, terrainRank, wormPenalty];
   };
   cands.sort((a, b) => {
     const ka = key(a);
     const kb = key(b);
-    for (let i = 0; i < ka.length; i++) if (ka[i] !== kb[i]) return ka[i] - kb[i];
+    for (let i = 0; i < ka.length; i++)
+      if (ka[i] !== kb[i]) return ka[i] - kb[i];
     return a.localeCompare(b);
   });
   return cands[0];
@@ -265,7 +319,10 @@ export function selectMove(s: GameState): HarkonnenAction | null {
 
   const movable = harkonnenLegions(s).filter((l) => {
     if (l.area === target || unitCount(l) === 0) return false;
-    const d = harkonnenDistance(l.area, target, { blocked, allowBlockedTarget: true });
+    const d = harkonnenDistance(l.area, target, {
+      blocked,
+      allowBlockedTarget: true,
+    });
     if (!isFinite(d) || d === 0) return false;
     if (harkonnenAreAdjacent(l.area, target)) {
       // adjacent to target: only move (to merge) if adjacent to another Harkonnen legion
@@ -275,12 +332,16 @@ export function selectMove(s: GameState): HarkonnenAction | null {
   });
   if (movable.length === 0) return null;
 
-  const { sources } = nearestByDistance(movable.map((l) => l.area), target, {
-    blocked,
-    allowBlockedTarget: true,
-  });
+  const { sources } = nearestByDistance(
+    movable.map((l) => l.area),
+    target,
+    {
+      blocked,
+      allowBlockedTarget: true,
+    },
+  );
   const chosen = sources
-    .map((a) => legionAt(s, a, 'harkonnen')!)
+    .map((a) => legionAt(s, a, "harkonnen")!)
     .reduce((m, l) => (combatPower(l) > combatPower(m) ? l : m));
 
   // Merge case: a legion adjacent to the target moves into the adjacent Harkonnen legion
@@ -294,12 +355,16 @@ export function selectMove(s: GameState): HarkonnenAction | null {
           harkonnenDistance(b, target, { blocked, allowBlockedTarget: true }),
       );
     if (mergeInto.length === 0) return null;
-    return { kind: 'move', legion: chosen.area, path: [chosen.area, mergeInto[0]] };
+    return {
+      kind: "move",
+      legion: chosen.area,
+      path: [chosen.area, mergeInto[0]],
+    };
   }
 
   const next = pickNextStep(s, chosen.area, target);
   if (!next) return null;
-  return { kind: 'move', legion: chosen.area, path: [chosen.area, next] };
+  return { kind: "move", legion: chosen.area, path: [chosen.area, next] };
 }
 
 // ---------------------------------------------------------------------------
@@ -312,14 +377,14 @@ export const DEPLOY_UNITS = 3;
 export const STACKING_LIMIT = 6;
 
 /** Named leaders that must be deployed before any other named leader. */
-const PRIORITY_NAMED = ['Beast Rabban', 'Feyd-Rautha'];
+const PRIORITY_NAMED = ["Beast Rabban", "Feyd-Rautha"];
 
 /** Pick the leader to deploy: priority named first, then any named, then a Bashar, else null. */
 function chooseDeployLeader(s: GameState): string | null {
   const named = s.harkonnenReserve.namedLeaders;
   for (const p of PRIORITY_NAMED) if (named.includes(p)) return p;
   if (named.length > 0) return named[0];
-  if (s.harkonnenReserve.bashars > 0) return 'Bashar';
+  if (s.harkonnenReserve.bashars > 0) return "Bashar";
   return null;
 }
 
@@ -327,9 +392,16 @@ function chooseDeployLeader(s: GameState): string | null {
  * Pick `count` units from the reserve, substituting a missing tier with the next-higher combat
  * power (regular→elite→special_elite); nothing is lower than regular. Mutates a working copy.
  */
-function pickUnits(reserve: Record<UnitType, number>, count: number): Record<UnitType, number> {
-  const out: Record<UnitType, number> = { regular: 0, elite: 0, special_elite: 0 };
-  const order: UnitType[] = ['regular', 'elite', 'special_elite'];
+function pickUnits(
+  reserve: Record<UnitType, number>,
+  count: number,
+): Record<UnitType, number> {
+  const out: Record<UnitType, number> = {
+    regular: 0,
+    elite: 0,
+    special_elite: 0,
+  };
+  const order: UnitType[] = ["regular", "elite", "special_elite"];
   let need = count;
   for (const t of order) {
     if (need <= 0) break;
@@ -351,19 +423,28 @@ export function resolveDeployment(s: GameState): HarkonnenAction {
   const reserve = { ...s.harkonnenReserve.units };
   const leader = chooseDeployLeader(s);
   const totalAvail = reserve.regular + reserve.elite + reserve.special_elite;
-  if (totalAvail === 0 && !leader) return { kind: 'none', reason: 'nothing to deploy' };
+  if (totalAvail === 0 && !leader)
+    return { kind: "none", reason: "nothing to deploy" };
 
   // Ordered settlements: highest-CP legion first, then closest to the target sietch.
   const settlements = s.settlements
     .filter((st) => !st.destroyed)
     .map((st) => {
-      const leg = legionAt(s, st.area, 'harkonnen');
-      const dist = s.targetSietchId ? harkonnenDistance(st.area, s.targetSietchId) : Infinity;
-      return { area: st.area, cp: leg ? combatPower(leg) : 0, dist, used: leg ? unitCount(leg) : 0 };
+      const leg = legionAt(s, st.area, "harkonnen");
+      const dist = s.targetSietchId
+        ? harkonnenDistance(st.area, s.targetSietchId)
+        : Infinity;
+      return {
+        area: st.area,
+        cp: leg ? combatPower(leg) : 0,
+        dist,
+        used: leg ? unitCount(leg) : 0,
+      };
     })
     .sort((a, b) => (b.cp !== a.cp ? b.cp - a.cp : a.dist - b.dist));
 
-  if (settlements.length === 0) return { kind: 'none', reason: 'no settlements to deploy into' };
+  if (settlements.length === 0)
+    return { kind: "none", reason: "no settlements to deploy into" };
 
   const placements: DeployPlacement[] = [];
   let toPlace = Math.min(DEPLOY_UNITS, totalAvail);
@@ -376,15 +457,21 @@ export function resolveDeployment(s: GameState): HarkonnenAction {
     if (capacity <= 0) continue;
     const units = pickUnits(reserve, Math.min(toPlace, capacity));
     const n = units.regular + units.elite + units.special_elite;
-    const placeLeaderHere = !leaderPlaced && leader !== null && (n > 0 || placements.length === 0);
+    const placeLeaderHere =
+      !leaderPlaced && leader !== null && (n > 0 || placements.length === 0);
     if (n === 0 && !placeLeaderHere) continue;
-    placements.push({ settlement: st.area, units, leader: placeLeaderHere ? leader : null });
+    placements.push({
+      settlement: st.area,
+      units,
+      leader: placeLeaderHere ? leader : null,
+    });
     toPlace -= n;
     if (placeLeaderHere) leaderPlaced = true;
   }
 
-  if (placements.length === 0) return { kind: 'none', reason: 'no capacity to deploy' };
-  return { kind: 'deploy', placements };
+  if (placements.length === 0)
+    return { kind: "none", reason: "no capacity to deploy" };
+  return { kind: "deploy", placements };
 }
 
 // ---------------------------------------------------------------------------
@@ -397,13 +484,16 @@ export function resolveDeployment(s: GameState): HarkonnenAction {
  */
 export function resolveLeadershipOrStrategy(
   s: GameState,
-  result: 'leadership' | 'strategy',
+  result: "leadership" | "strategy",
 ): HarkonnenAction {
-  const requireLeader = result === 'leadership';
+  const requireLeader = result === "leadership";
   return (
     selectSietchAttack(s, requireLeader) ??
     selectLegionAttack(s, requireLeader) ??
-    selectMove(s) ?? { kind: 'none', reason: 'no sietch/legion attack and no move available' }
+    selectMove(s) ?? {
+      kind: "none",
+      reason: "no sietch/legion attack and no move available",
+    }
   );
 }
 
@@ -413,7 +503,7 @@ export function resolveLeadershipOrStrategy(
 
 /** Resolve MENTAT: draw 2 planning cards (alternating Harkonnen/Corrino) and play them at once. */
 export function resolveMentat(_s: GameState): HarkonnenAction {
-  return { kind: 'mentat' };
+  return { kind: "mentat" };
 }
 
 // ---------------------------------------------------------------------------
@@ -421,7 +511,10 @@ export function resolveMentat(_s: GameState): HarkonnenAction {
 // ---------------------------------------------------------------------------
 
 /** Distance from an area to the nearest live sietch (Infinity if none reachable). */
-function distanceToNearestSietch(s: GameState, area: string): { dist: number; sietch: string | null } {
+function distanceToNearestSietch(
+  s: GameState,
+  area: string,
+): { dist: number; sietch: string | null } {
   let best = Infinity;
   let which: string | null = null;
   for (const si of s.sietches) {
@@ -449,19 +542,30 @@ export function resolveHouse(s: GameState): HarkonnenAction {
     const ranked = candidates
       .map((l) => {
         const near = distanceToNearestSietch(s, l.area);
-        const defCp = near.sietch ? combatPower(sietchDefender(s, near.sietch)) : 0;
-        const targetDist = s.targetSietchId ? harkonnenDistance(l.area, s.targetSietchId) : Infinity;
-        return { legion: l, nearDist: near.dist, cpDiff: combatPower(l) - defCp, targetDist };
+        const defCp = near.sietch
+          ? combatPower(sietchDefender(s, near.sietch))
+          : 0;
+        const targetDist = s.targetSietchId
+          ? harkonnenDistance(l.area, s.targetSietchId)
+          : Infinity;
+        return {
+          legion: l,
+          nearDist: near.dist,
+          cpDiff: combatPower(l) - defCp,
+          targetDist,
+        };
       })
       .sort(
         (a, b) =>
-          a.nearDist - b.nearDist || b.cpDiff - a.cpDiff || a.targetDist - b.targetDist,
+          a.nearDist - b.nearDist ||
+          b.cpDiff - a.cpDiff ||
+          a.targetDist - b.targetDist,
       );
     const best = ranked[0];
     const count = Math.min(2, best.legion.units.regular, elitesAvail);
-    return { kind: 'house_replace', legion: best.legion.area, count };
+    return { kind: "house_replace", legion: best.legion.area, count };
   }
-  return { kind: 'house_place_vehicles' };
+  return { kind: "house_place_vehicles" };
 }
 
 // ---------------------------------------------------------------------------
@@ -469,16 +573,19 @@ export function resolveHouse(s: GameState): HarkonnenAction {
 // ---------------------------------------------------------------------------
 
 /** Resolve a rolled Harkonnen action-die result into a concrete decision. */
-export function resolveAction(s: GameState, result: ActionResult): HarkonnenAction {
+export function resolveAction(
+  s: GameState,
+  result: ActionResult,
+): HarkonnenAction {
   switch (result) {
-    case 'leadership':
-    case 'strategy':
+    case "leadership":
+    case "strategy":
       return resolveLeadershipOrStrategy(s, result);
-    case 'deployment':
+    case "deployment":
       return resolveDeployment(s);
-    case 'mentat':
+    case "mentat":
       return resolveMentat(s);
-    case 'house':
+    case "house":
       return resolveHouse(s);
   }
 }
