@@ -27,12 +27,14 @@ solo player (playing Atreides) doesn't have to execute the Harkonnen priority ru
 
 ## 3. Build phases
 
-### Phase 0 — Board data  *(✅ COMPLETE 2026-06-27 — all of §1–§5 done & user-verified)*
+### Phase 0 — Board data _(✅ COMPLETE 2026-06-27 — all of §1–§5 done & user-verified)_
+
 > **Resume here (next session): Phase 1 — generate `board.ts`** from `BOARD_VERIFICATION.md` §3a (adjacency),
 > §4 (impassable), §5 (air zones), plus §1/§2 (areas, types, sectors, settlements/sietches). Delete §3b
 > (old unreliable draft) when porting. A well-formedness test already passed via `scripts/gen_map.py`
 > (symmetric edges, no isolated nodes, every id resolves). See also `BOARD_GRAPH.md` for the visual map.
-Living file: `BOARD_VERIFICATION.md`. Extracted from physical-board photos in `docs/images/`.
+> Living file: `BOARD_VERIFICATION.md`. Extracted from physical-board photos in `docs/images/`.
+
 - [x] Area names + types (colour rule: orange=plateau, grey=mountain, sand=desert, + minor_erg)
 - [x] Settlements (Arrakeen III, Carthag II, 4 Pyon villages I: Arsunt, Hagga Basin, Imperial Basin, North Pole)
 - [x] All 8 sietches named
@@ -48,7 +50,8 @@ Living file: `BOARD_VERIFICATION.md`. Extracted from physical-board photos in `d
 - [x] §4 Impassable borders — **DONE & user-verified exhaustive (2026-06-27): 11 red pairs** in `BOARD_VERIFICATION.md` §4 (one continuous arc on the N+W face of the central mass).
 - [x] §5 Air zones — **DONE & user-confirmed (2026-06-27): 8 zones** in `BOARD_VERIFICATION.md` §5 (4 inner-ring links + 4 outer→inner spokes; each connects a specific 2–3 areas, not whole sectors/pole).
 
-### Phase 1 — `board.ts`  *(✅ DONE 2026-06-27)*
+### Phase 1 — `board.ts` _(✅ DONE 2026-06-27)_
+
 - [x] Generated typed board module `src/engine/board.ts` from `BOARD_VERIFICATION.md` via
       `scripts/gen_board.py` (`npm run gen:board`): 101 `AREAS` (id/name/sector/terrain/deep/
       settlement/sietch), symmetric `ADJACENCY` (265 edges), `IMPASSABLE` (11), `AIR_ZONES` (8).
@@ -60,8 +63,10 @@ Living file: `BOARD_VERIFICATION.md`. Extracted from physical-board photos in `d
       connected graph, no isolated nodes, impassable disjoint from passable, air zones valid.
       Toolchain: Node 22, TypeScript (strict, `tsc --noEmit` clean), Vitest. (Vite+React deferred to Phase 3.)
 
-### Phase 2 — Headless Harkonnen AI engine  *(the core value)*
+### Phase 2 — Headless Harkonnen AI engine _(the core value)_
+
 Pure TS + tests, no UI. Model the round and the priority cascades from fan-summary p9:
+
 - [x] **Spice Must Flow board** (`src/engine/spiceMustFlow.ts`, 13 tests): data captured from the
       physical SMF board (5 rows; per-row dice + harvester/ornithopter/carryall counts; bottom =
       Imperium Ban). `activeRow`/`availability`/`activeBans`; `resolveSpiceHarvesting` (solo
@@ -76,13 +81,13 @@ Pure TS + tests, no UI. Model the round and the priority cascades from fan-summa
       start-of-round draw (harvesting sector + target sietch w/ re-draw constraints),
       mid-round target reselection, end-of-round supremacy/prescience constants. 12 tests. (2026-06-27)
 - [~] Action-die resolver (`src/engine/harkonnenActions.ts`, 10 tests): LEADERSHIP/STRATEGY
-      cascade — `selectSietchAttack` (reach incl. ornithopter "if necessary"; priority rank→CP
-      diff→no-ornithopter→target sietch), `selectLegionAttack` (adjacent only, priority CP→named
-      leader), `selectMove` (basic: nearest legion steps toward target), `resolveLeadershipOrStrategy`.
-      Plus accessors (harkonnen/atreides legions, ornithopter zones, blocked-areas). MENTAT
-      (`resolveMentat`), HOUSE (`resolveHouse`: replace 2 regulars→elites by legion priority, else
-      place vehicles), DEPLOYMENT, and top-level `resolveAction` dispatch — all done. TODO: full
-      movement tie-breakers + merge; "activate named-leader special first"; card-effect resolution.
+  cascade — `selectSietchAttack` (reach incl. ornithopter "if necessary"; priority rank→CP
+  diff→no-ornithopter→target sietch), `selectLegionAttack` (adjacent only, priority CP→named
+  leader), `selectMove` (basic: nearest legion steps toward target), `resolveLeadershipOrStrategy`.
+  Plus accessors (harkonnen/atreides legions, ornithopter zones, blocked-areas). MENTAT
+  (`resolveMentat`), HOUSE (`resolveHouse`: replace 2 regulars→elites by legion priority, else
+  place vehicles), DEPLOYMENT, and top-level `resolveAction` dispatch — all done. TODO: full
+  movement tie-breakers + merge; "activate named-leader special first"; card-effect resolution.
 - [x] **Movement** = shortest-path to target sietch + tie-breakers (the hard part).
       Primitives (`src/engine/movement.ts`, 15 tests): Harkonnen adjacency ignoring impassable
       borders, BFS distance/shortest-path with occupancy, `nearestByDistance`, ornithopter
@@ -110,12 +115,11 @@ Pure TS + tests, no UI. Model the round and the priority cascades from fan-summa
 - [x] **Card data modules** (from `docs/images/` card photos): `leaders.ts` (7 named leaders +
       Bashar: action slot, entry condition, special, combat-ability hits/shields — all captured),
       `imperiumBans.ts` (3 bans; CHOAM→stacking 5 wired into deploy/move), `planningCards.ts`
-      (36-card catalog: 18 House Harkonnen + 18 Corrino). Effect *resolution* deferred.
+      (36-card catalog: 18 House Harkonnen + 18 Corrino). Effect _resolution_ deferred.
 - [x] **Planning-card effect resolution** (`src/engine/cardEffects.ts`, 9 tests): every Harkonnen
       card (18 House Harkonnen + 18 Corrino Ally) encoded as ordered play STEPS. Auto-applies the
       deterministic ones (fixed-location unit placement, vehicle placement via the placement engine,
-      deck draws); moves/attacks/leader-entries/choices render as player directives. `resolveCardPlay`
-      + `applyCardSteps`; wired into the UI "Play a planning card" panel (auto/you badges). Shared
+      deck draws); moves/attacks/leader-entries/choices render as player directives. `resolveCardPlay` + `applyCardSteps`; wired into the UI "Play a planning card" panel (auto/you badges). Shared
       `areaLabel` moved to `engine/describeArea.ts`.
 - [x] **Named-leader special-action resolution** (`src/engine/leaderEffects.ts`, 5 tests): each
       named leader's red action (from `leaders.ts`) encoded as ordered steps via the shared
@@ -135,6 +139,7 @@ Pure TS + tests, no UI. Model the round and the priority cascades from fan-summa
       mechanics (a single rolled Harkonnen shield the text seems to drop).
 
 ### Phase 3 — React + TS UI
+
 - [x] Project scaffold (Vite 6 + React 18 + TS; `npm run dev`/`build`/`preview`). `src/ui/`
       decoupled from the pure `src/engine/`. Build + dev server verified; 136 tests pass.
 - [x] "Resolve Harkonnen turn" flow: `App.tsx` — this-round panel (dice/vehicles/bans from SMF),
@@ -153,8 +158,10 @@ Pure TS + tests, no UI. Model the round and the priority cascades from fan-summa
       start-in-play named leaders in the reserve pool; Harkonnen settlements empty per the solo
       pool rule). Wired to a "New game" button in the editor (undoable via `commit`).
 - [ ] Sync the few Atreides-side changes the AI depends on
+- [ ] An easy way to move Atreides legion from one area to another
 
-### Phase 4 — Persistence  *(✅ DONE 2026-06-27)*
+### Phase 4 — Persistence _(✅ DONE 2026-06-27)_
+
 - [x] Save/restore game state (`src/ui/persistence.ts`, 12 tests): single auto-saved game in
       localStorage (versioned key, shape-validated, storage-injectable) + Reset. Export/Import:
       `exportState` (versioned envelope) downloads a JSON file; `importState` (accepts the envelope
@@ -163,12 +170,15 @@ Pure TS + tests, no UI. Model the round and the priority cascades from fan-summa
       "Saved games" panel in the editor (name + Save, per-row Load/Delete).
 
 ### Phase 5 — Polish & mobile
-- [~] UX polish: **Undo** (header button, bounded 20-deep history) reverts the last applied
-      Harkonnen action — resolve/card/leader/next-round apply through `commit` (snapshots first);
-      import/named-load/reset start a fresh history via `loadGame`. TODO: more polish, then Capacitor.
 
-### Phase 6 — Onboarding & teaching  *(future)*
+- [~] UX polish: **Undo** (header button, bounded 20-deep history) reverts the last applied
+  Harkonnen action — resolve/card/leader/next-round apply through `commit` (snapshots first);
+  import/named-load/reset start a fresh history via `loadGame`. TODO: more polish, then Capacitor.
+
+### Phase 6 — Onboarding & teaching _(future)_
+
 Lower the barrier for a brand-new solo player picking up the app cold.
+
 - [ ] **Guided board setup.** A step-by-step wizard that walks the player through physically
       laying out the board for a fresh Mahdi-solo game (place Atreides sietch legions, deployment
       tokens, named-leader/reserve pool, imperium markers, harvesting sector + target sietch draws),
@@ -196,6 +206,6 @@ Lower the barrier for a brand-new solo player picking up the app cold.
 
 - `BOARD_VERIFICATION.md` — board data (source of truth for Phase 1).
 - `board-extraction-notes.md` — how the board was read + raw findings.
-- `docs/` — rulebook (p37 = solo), FAQ, fan rules summary (p9 = Mahdi solo AI). *(gitignored: large)*
-- `docs/images/` — physical-board photos used for extraction. *(gitignored: large)*
+- `docs/` — rulebook (p37 = solo), FAQ, fan rules summary (p9 = Mahdi solo AI). _(gitignored: large)_
+- `docs/images/` — physical-board photos used for extraction. _(gitignored: large)_
 - Memory index: see the project memory (`MEMORY.md`) — decisions, the colour rule, "always save to memory".
