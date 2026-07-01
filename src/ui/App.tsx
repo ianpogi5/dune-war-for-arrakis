@@ -208,7 +208,7 @@ function RoundPanel({ s, onChange }: { s: GameState; onChange: (next: GameState)
   );
 }
 
-function VehiclePanel({ s, onChange, showSuggestions }: { s: GameState; onChange: (next: GameState) => void; showSuggestions?: boolean }) {
+function VehiclePanel({ s, onChange }: { s: GameState; onChange: (next: GameState) => void }) {
   const avail = availability(s.spice.markers);
   const placement = useMemo(
     () =>
@@ -220,45 +220,62 @@ function VehiclePanel({ s, onChange, showSuggestions }: { s: GameState; onChange
     [s, avail.harvesters, avail.carryalls, avail.ornithopters],
   );
 
+  const applyPlacement = () => {
+    const vehicles: import('../engine/state').Vehicle[] = [
+      ...placement.harvesters.map((loc) => ({ type: 'harvester' as const, location: loc })),
+      ...placement.carryalls.map((loc) => ({ type: 'carryall' as const, location: loc })),
+      ...placement.ornithopters.map((loc) => ({ type: 'ornithopter' as const, location: loc })),
+    ];
+    onChange({ ...s, vehicles });
+  };
+
+  const removeVehicle = (v: import('../engine/state').Vehicle) =>
+    onChange({ ...s, vehicles: s.vehicles.filter((x) => x !== v) });
+
   const harvesters = s.vehicles.filter((v) => v.type === 'harvester');
   const carryalls = s.vehicles.filter((v) => v.type === 'carryall');
   const ornithopters = s.vehicles.filter((v) => v.type === 'ornithopter');
-  const removeVehicle = (idx: number) =>
-    onChange({ ...s, vehicles: s.vehicles.filter((_, i) => i !== idx) });
 
   return (
     <section className="panel">
-      <h2>Vehicles</h2>
-      {showSuggestions && (placement.harvesters.length > 0 || placement.carryalls.length > 0 || placement.ornithopters.length > 0) && (
-        <>
-          <p className="hint">Where to place the Harkonnen vehicles on the board this round.</p>
-          <p><strong>Place harvesters:</strong> <AreaChips ids={placement.harvesters} /></p>
-          <p><strong>Place carryalls:</strong> <AirZoneChips ids={placement.carryalls} /></p>
-          <p><strong>Place ornithopters:</strong> <AirZoneChips ids={placement.ornithopters} /></p>
-        </>
-      )}
+      <h2>Vehicle placement</h2>
+      <p className="hint">Where to place the Harkonnen vehicles on the board this round.</p>
+      <p><strong>Harvesters:</strong> <AreaChips ids={placement.harvesters} /></p>
+      <p><strong>Carryalls:</strong> <AirZoneChips ids={placement.carryalls} /></p>
+      <p><strong>Ornithopters:</strong> <AirZoneChips ids={placement.ornithopters} /></p>
+      <button className="confirm-btn" onClick={applyPlacement}>Apply placement</button>
       {(harvesters.length > 0 || carryalls.length > 0 || ornithopters.length > 0) && (
         <>
-          <p className="hint">Currently on the board. Remove a harvester when an Atreides legion or sandworm moves onto it.</p>
+          <p className="hint" style={{ marginTop: '1em' }}>On the board — remove when destroyed by an Atreides legion or sandworm.</p>
           {harvesters.length > 0 && (
             <p><strong>Harvesters:</strong>{' '}
               {harvesters.map((v, i) => (
                 <span key={i} style={{ marginRight: '0.4em' }}>
                   <AreaChip id={v.location} />{' '}
-                  <button
-                    className="remove"
-                    title="Remove this harvester"
-                    onClick={() => removeVehicle(s.vehicles.indexOf(v))}
-                  >✕</button>
+                  <button className="remove" title="Remove harvester" onClick={() => removeVehicle(v)}>✕</button>
                 </span>
               ))}
             </p>
           )}
           {carryalls.length > 0 && (
-            <p><strong>Carryalls:</strong> <AirZoneChips ids={carryalls.map((v) => v.location)} /></p>
+            <p><strong>Carryalls:</strong>{' '}
+              {carryalls.map((v, i) => (
+                <span key={i} style={{ marginRight: '0.4em' }}>
+                  <AirZoneChip id={v.location} />{' '}
+                  <button className="remove" title="Remove carryall" onClick={() => removeVehicle(v)}>✕</button>
+                </span>
+              ))}
+            </p>
           )}
           {ornithopters.length > 0 && (
-            <p><strong>Ornithopters:</strong> <AirZoneChips ids={ornithopters.map((v) => v.location)} /></p>
+            <p><strong>Ornithopters:</strong>{' '}
+              {ornithopters.map((v, i) => (
+                <span key={i} style={{ marginRight: '0.4em' }}>
+                  <AirZoneChip id={v.location} />{' '}
+                  <button className="remove" title="Remove ornithopter" onClick={() => removeVehicle(v)}>✕</button>
+                </span>
+              ))}
+            </p>
           )}
         </>
       )}
@@ -1347,7 +1364,7 @@ export function App() {
         <StateEditor s={s} onChange={setS} onPick={setPick} pick={pick} />
         <RoundPanel s={s} onChange={commit} />
         <PhasePanel s={s} onChange={setS} showAll={showAllPanels} onToggleShowAll={setShowAllPanels} />
-        {(inPhase('vehicle_placement') || inPhase('action_resolution')) && <VehiclePanel s={s} onChange={commit} showSuggestions={inPhase('vehicle_placement')} />}
+        {inPhase('vehicle_placement') && <VehiclePanel s={s} onChange={commit} />}
         {inPhase('action_resolution') && <ResolvePanel s={s} onApply={commit} />}
         {inPhase('action_resolution') && <BattlePanel s={s} onApply={commit} />}
         {inPhase('action_resolution') && <CardPanel s={s} onApply={commit} />}

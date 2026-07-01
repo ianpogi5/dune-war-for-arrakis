@@ -6,19 +6,25 @@
 //    Target-Sietch tactical card (with re-draw constraints).
 //  - End of round: advance the supremacy marker 1 step; reshuffle all 8 tactical cards.
 
-import { AREAS, type SectorId } from './board';
-import type { GameState, RoundPhase, TacticalCard, TacticalSector } from './state';
+import { AREAS, type SectorId } from "./board";
+import type {
+  GameState,
+  RoundPhase,
+  TacticalCard,
+  TacticalSector,
+} from "./state";
 
 // ---------------------------------------------------------------------------
 // Sectors: the 4 sectors adjacent to the North Pole are "central" and a tactical
 // card treats all 4 as a single sector. The North Pole itself is part of all 4.
 // ---------------------------------------------------------------------------
 
-export const CENTRAL_SECTORS: readonly SectorId[] = ['s5', 's6', 's7', 's8'];
+export const CENTRAL_SECTORS: readonly SectorId[] = ["s5", "s6", "s7", "s8"];
 
 /** The tactical-card sector for an area: 'central' for central/pole areas, else the outer sector. */
 export function tacticalSectorOf(areaSector: SectorId): TacticalSector {
-  if (areaSector === 'np' || CENTRAL_SECTORS.includes(areaSector)) return 'central';
+  if (areaSector === "np" || CENTRAL_SECTORS.includes(areaSector))
+    return "central";
   return areaSector;
 }
 
@@ -30,11 +36,18 @@ export function tacticalSectorOf(areaSector: SectorId): TacticalSector {
 
 export const TACTICAL_CARDS: readonly TacticalCard[] = Object.values(AREAS)
   .filter((a) => a.sietch)
-  .map((a) => ({ id: `tac_${a.id}`, sietchId: a.id, sector: tacticalSectorOf(a.sector) }))
+  .map((a) => ({
+    id: `tac_${a.id}`,
+    sietchId: a.id,
+    sector: tacticalSectorOf(a.sector),
+  }))
   .sort((x, y) => x.sietchId.localeCompare(y.sietchId));
 
 /** Two tactical cards share a sector (central counts as one), which forbids pairing them. */
-export function sameTacticalSector(a: TacticalSector, b: TacticalSector): boolean {
+export function sameTacticalSector(
+  a: TacticalSector,
+  b: TacticalSector,
+): boolean {
   return a === b;
 }
 
@@ -43,12 +56,12 @@ export function sameTacticalSector(a: TacticalSector, b: TacticalSector): boolea
 // ---------------------------------------------------------------------------
 
 export const PHASE_ORDER: readonly RoundPhase[] = [
-  'start',
-  'vehicle_placement',
-  'action_resolution',
-  'desert_hazards',
-  'spice_harvesting',
-  'end',
+  "start",
+  "vehicle_placement",
+  "action_resolution",
+  "desert_hazards",
+  "spice_harvesting",
+  "end",
 ];
 
 /** The phase after `p`, or null after the final ('end') phase. */
@@ -86,12 +99,16 @@ export function drawTacticalCards(
   deck: readonly TacticalCard[],
   isDestroyed: (sietchId: string) => boolean = () => false,
 ): TacticalDraw {
-  if (deck.length < 2) throw new Error('tactical deck needs at least 2 cards');
+  if (deck.length < 2) throw new Error("tactical deck needs at least 2 cards");
   const harvestingCard = deck[0];
   const targetCard = deck
     .slice(1)
-    .find((c) => !sameTacticalSector(c.sector, harvestingCard.sector) && !isDestroyed(c.sietchId));
-  if (!targetCard) throw new Error('no eligible target-sietch card in deck');
+    .find(
+      (c) =>
+        !sameTacticalSector(c.sector, harvestingCard.sector) &&
+        !isDestroyed(c.sietchId),
+    );
+  if (!targetCard) throw new Error("no eligible target-sietch card in deck");
   return {
     harvestingSector: harvestingCard.sector,
     targetSietchId: targetCard.sietchId,
@@ -111,7 +128,9 @@ export function reselectTargetSietch(
   isDestroyed: (sietchId: string) => boolean,
 ): string | null {
   const card = deck.find(
-    (c) => !sameTacticalSector(c.sector, harvestingSector) && !isDestroyed(c.sietchId),
+    (c) =>
+      !sameTacticalSector(c.sector, harvestingSector) &&
+      !isDestroyed(c.sietchId),
   );
   return card ? card.sietchId : null;
 }
@@ -128,7 +147,10 @@ export const SUPREMACY_WIN = 10;
 export const PRESCIENCE_DRAW_SOLO = 2;
 
 /** Fisher–Yates shuffle (pure; returns a new array). `rng` returns [0,1). */
-export function shuffle<T>(arr: readonly T[], rng: () => number = Math.random): T[] {
+export function shuffle<T>(
+  arr: readonly T[],
+  rng: () => number = Math.random,
+): T[] {
   const a = [...arr];
   for (let i = a.length - 1; i > 0; i--) {
     const j = Math.floor(rng() * (i + 1));
@@ -150,8 +172,12 @@ export interface NextRoundResult {
  * supremacy marker (those are end-of-round concerns), so it's what begins round 1 of a new game.
  * `rng` is injectable for deterministic tests.
  */
-export function setupRound(s: GameState, rng: () => number = Math.random): GameState {
-  const isDestroyed = (id: string) => s.sietches.find((si) => si.area === id)?.destroyed ?? false;
+export function setupRound(
+  s: GameState,
+  rng: () => number = Math.random,
+): GameState {
+  const isDestroyed = (id: string) =>
+    s.sietches.find((si) => si.area === id)?.destroyed ?? false;
 
   const deck = shuffle(TACTICAL_CARDS, rng);
   let harvestingSector: TacticalSector = deck[0].sector;
@@ -164,7 +190,7 @@ export function setupRound(s: GameState, rng: () => number = Math.random): GameS
     // No eligible target (e.g. few sietches left) — leave target unset for the player to pick.
   }
 
-  return { ...s, phase: 'vehicle_placement', harvestingSector, targetSietchId };
+  return { ...s, phase: "vehicle_placement", harvestingSector, targetSietchId };
 }
 
 /**
@@ -172,12 +198,19 @@ export function setupRound(s: GameState, rng: () => number = Math.random): GameS
  * capped at the win step), bump the round number, then run the next round's start-of-round setup
  * ([[setupRound]]: reshuffle + draw harvesting sector & target sietch). `rng` is injectable.
  */
-export function startNextRound(s: GameState, rng: () => number = Math.random): NextRoundResult {
-  const supremacy = Math.min(SUPREMACY_WIN, s.tracks.supremacy + SUPREMACY_PER_ROUND);
+export function startNextRound(
+  s: GameState,
+  rng: () => number = Math.random,
+): NextRoundResult {
+  const supremacy = Math.min(
+    SUPREMACY_WIN,
+    s.tracks.supremacy + SUPREMACY_PER_ROUND,
+  );
   const ended: GameState = {
     ...s,
     round: s.round + 1,
     tracks: { ...s.tracks, supremacy },
+    vehicles: [], // vehicles return to supply at end of each round
   };
   return {
     state: setupRound(ended, rng),
