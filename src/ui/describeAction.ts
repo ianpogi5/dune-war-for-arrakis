@@ -3,7 +3,7 @@
 
 import type { HarkonnenAction } from "../engine/harkonnenActions";
 import { areaLabel } from "../engine/describeArea";
-import { IMPASSABLE } from '../engine/board';
+import { IMPASSABLE } from "../engine/board";
 
 // Re-export so existing UI imports (`./describeAction`) keep working.
 export { areaLabel };
@@ -22,7 +22,8 @@ export function pathCrossesImpassable(path: readonly string[]): boolean {
 }
 
 /** Trailing note appended to a move that crosses a red border (a Harkonnen-only privilege). */
-export const IMPASSABLE_NOTE = 'crossing an impassable border — the Harkonnen ignore these';
+export const IMPASSABLE_NOTE =
+  "crossing an impassable border — the Harkonnen ignore these";
 
 function unitsPhrase(u: {
   regular: number;
