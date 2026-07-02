@@ -17,40 +17,51 @@
 //  • Named leaders "in play at the start" (Beast Rabban, Baron Harkonnen, Captain Aramsham) are set
 //    aside as available-to-deploy (reserve), not pre-placed on the map.
 
-import { AREA_IDS, AREAS } from './board';
-import { NAMED_LEADERS } from './leaders';
-import { deckSize, HOUSE_HARKONNEN_CARDS, CORRINO_ALLY_CARDS } from './planningCards';
-import { emptyLegion, type GameState, type Legion } from './state';
+import { AREA_IDS, AREAS } from "./board";
+import { NAMED_LEADERS } from "./leaders";
+import {
+  deckSize,
+  HOUSE_HARKONNEN_CARDS,
+  CORRINO_ALLY_CARDS,
+} from "./planningCards";
+import { emptyLegion, type GameState, type Legion } from "./state";
 
 export function newGameState(): GameState {
   const settlementAreas = AREA_IDS.filter((id) => AREAS[id].settlement != null);
   const sietchAreas = AREA_IDS.filter((id) => AREAS[id].sietch);
   const stationAreas = AREA_IDS.filter((id) => AREAS[id].testingStation);
-  const startLeaders = NAMED_LEADERS.filter((l) => l.entry.kind === 'start').map((l) => l.name);
+  const startLeaders = NAMED_LEADERS.filter(
+    (l) => l.entry.kind === "start",
+  ).map((l) => l.name);
 
   // One Atreides legion per sietch: 1 facedown deployment token + 1 Naib (generic) leader.
   const atreidesLegions: Legion[] = sietchAreas.map((area) => ({
-    ...emptyLegion('atreides', area),
+    ...emptyLegion("atreides", area),
     deploymentTokens: 1,
-    leaders: [{ kind: 'generic', faction: 'atreides' }],
+    leaders: [{ kind: "generic", faction: "atreides" }],
   }));
 
   // One Harkonnen legion per settlement: 2 facedown Starting Deployment tokens (1 of each type).
   const harkonnenLegions: Legion[] = settlementAreas.map((area) => ({
-    ...emptyLegion('harkonnen', area),
+    ...emptyLegion("harkonnen", area),
     deploymentTokens: 2,
   }));
 
   return {
     round: 1,
-    phase: 'start',
+    phase: "start",
 
     settlements: settlementAreas.map((area) => ({
       area,
       rank: AREAS[area].settlement as 1 | 2 | 3,
       destroyed: false,
     })),
-    sietches: sietchAreas.map((area) => ({ area, rank: null, revealed: false, destroyed: false })),
+    sietches: sietchAreas.map((area) => ({
+      area,
+      rank: null,
+      revealed: false,
+      destroyed: false,
+    })),
     testingStations: stationAreas.map((area) => ({ area, revealed: false })),
 
     legions: [...harkonnenLegions, ...atreidesLegions],
@@ -61,7 +72,11 @@ export function newGameState(): GameState {
     harvestingSector: null, // drawn from the Tactical deck at the start of round 1
     targetSietchId: null,
 
-    spice: { markers: { choam: 1, spacing_guild: 1, landsraad: 1 }, activeBans: [], spiceReserve: 0 },
+    spice: {
+      markers: { choam: 1, spacing_guild: 1, landsraad: 1 },
+      activeBans: [],
+      spiceReserve: 0,
+    },
     tracks: { supremacy: 0, prescience: [0, 0, 0] },
     decks: {
       planning: {
@@ -70,7 +85,12 @@ export function newGameState(): GameState {
         house_harkonnen: deckSize(HOUSE_HARKONNEN_CARDS),
         corrino_ally: deckSize(CORRINO_ALLY_CARDS),
       },
-      planningDiscard: { house_atreides: 0, fremen_ally: 0, house_harkonnen: 0, corrino_ally: 0 },
+      planningDiscard: {
+        house_atreides: 0,
+        fremen_ally: 0,
+        house_harkonnen: 0,
+        corrino_ally: 0,
+      },
       prescienceDeck: 18,
       reinforcements: 0,
       wormsignPool: 16,
