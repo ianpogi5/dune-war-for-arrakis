@@ -61,8 +61,13 @@ describe("newGameState", () => {
     expect(s.tracks.prescience).toEqual([0, 0, 0]);
   });
 
-  it("puts the 12 starting deployment tokens and start-in-play leaders in the reserve", () => {
-    expect(s.harkonnenReserve.deploymentTokens).toBe(12);
+  it("starts the token pool empty (all 12 tokens are on-board garrisons) with start-in-play leaders in the reserve", () => {
+    expect(s.harkonnenReserve.deploymentTokens).toBe(0);
+    // All 12 Starting Deployment tokens sit on the 6 settlements (2 each).
+    const onBoard = s.legions
+      .filter((l) => l.faction === "harkonnen")
+      .reduce((n, l) => n + l.deploymentTokens, 0);
+    expect(onBoard).toBe(12);
     expect(s.harkonnenReserve.units).toEqual({
       regular: 16,
       elite: 8,

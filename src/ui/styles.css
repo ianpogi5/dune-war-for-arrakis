@@ -154,6 +154,12 @@ header h1 {
   font-size: 1.05rem;
 }
 
+/* Harkonnen-only "ignores impassable borders" aside inside a move directive. */
+.cross-impassable {
+  color: var(--accent);
+  font-size: 0.9rem;
+}
+
 .directive-actions {
   margin-top: 0.6rem;
 }
@@ -546,6 +552,23 @@ label.mini.check input {
 }
 
 .legion-row.atreides .faction-tag {
+  background: #2f5d50;
+}
+
+/* Inline faction label (e.g. Move-a-legion list) — a small colored pill with the faction name. */
+.faction-pill {
+  display: inline-block;
+  padding: 0.05rem 0.45rem;
+  border-radius: 0.7rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #fff;
+  vertical-align: middle;
+}
+.faction-pill.harkonnen {
+  background: var(--accent);
+}
+.faction-pill.atreides {
   background: #2f5d50;
 }
 

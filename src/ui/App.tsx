@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import type { ActionResult, GameState, ImperiumPower, Legion, RoundPhase } from '../engine/state';
-import { resolveAction } from '../engine/harkonnenActions';
+import { resolveAction, type HarkonnenAction } from '../engine/harkonnenActions';
 import { applyHarkonnenAction, isAutoApplied } from '../engine/applyAction';
 import {
   availability,
@@ -27,7 +27,7 @@ import { applyEffectSteps } from '../engine/effectSteps';
 import { stormTargets, stormHits, resolveCoriolisStorms, type StormDice } from '../engine/storms';
 import { HOUSE_HARKONNEN_CARDS, CORRINO_ALLY_CARDS } from '../engine/planningCards';
 import { NAMED_LEADERS } from '../engine/leaders';
-import { describeAction, actionHeadline, areaLabel } from './describeAction';
+import { describeAction, actionHeadline, areaLabel, unitsPhrase, pathCrossesImpassable, IMPASSABLE_NOTE } from './describeAction';
 import { sampleState } from './sampleState';
 import { newGameState } from '../engine/newGame';
 import { StateEditor } from './StateEditor';
@@ -207,7 +207,16 @@ function RoundPanel({ s, onChange }: { s: GameState; onChange: (next: GameState)
   );
 }
 
-function VehiclePanel({ s, onChange }: { s: GameState; onChange: (next: GameState) => void }) {
+function VehiclePanel({
+  s,
+  onChange,
+  editable = false,
+}: {
+  s: GameState;
+  onChange: (next: GameState) => void;
+  /** Action phase: allow removing vehicles destroyed on the board. Vehicle-placement phase: read-only list. */
+  editable?: boolean;
+}) {
   const removeVehicle = (v: import('../engine/state').Vehicle) =>
     onChange({ ...s, vehicles: s.vehicles.filter((x) => x !== v) });
 
@@ -215,22 +224,130 @@ function VehiclePanel({ s, onChange }: { s: GameState; onChange: (next: GameStat
   const carryalls = s.vehicles.filter((v) => v.type === 'carryall');
   const ornithopters = s.vehicles.filter((v) => v.type === 'ornithopter');
 
-  const renderRemovable = (v: import('../engine/state').Vehicle, i: number) => (
+  const renderVehicle = (v: import('../engine/state').Vehicle, i: number) => (
     <span key={i} style={{ marginRight: '0.4em' }}>
       {v.type === 'harvester' ? <AreaChip id={v.location} /> : <AirZoneChip id={v.location} />}{' '}
-      <button className="remove" title={`Remove ${v.type}`} onClick={() => removeVehicle(v)}>✕</button>
+      {editable && (
+        <button className="remove" title={`Remove ${v.type}`} onClick={() => removeVehicle(v)}>✕</button>
+      )}
     </span>
   );
 
   return (
     <section className="panel">
-      <h2>Vehicle placement</h2>
-      <p className="hint">Remove any vehicle destroyed by an Atreides legion or sandworm.</p>
-      {harvesters.length > 0 && <p><strong>Harvesters:</strong>{' '}{harvesters.map(renderRemovable)}</p>}
-      {carryalls.length > 0 && <p><strong>Carryalls:</strong>{' '}{carryalls.map(renderRemovable)}</p>}
-      {ornithopters.length > 0 && <p><strong>Ornithopters:</strong>{' '}{ornithopters.map(renderRemovable)}</p>}
+      <h2>{editable ? 'Vehicles on the board' : 'Vehicle placement'}</h2>
+      <p className="hint">
+        {editable
+          ? 'Remove any vehicle destroyed by an Atreides legion or sandworm. New vehicles are placed by the House action and planning cards.'
+          : 'Place the Harkonnen harvesters/carryalls/ornithopters as listed below.'}
+      </p>
+      {harvesters.length > 0 && <p><strong>Harvesters:</strong>{' '}{harvesters.map(renderVehicle)}</p>}
+      {carryalls.length > 0 && <p><strong>Carryalls:</strong>{' '}{carryalls.map(renderVehicle)}</p>}
+      {ornithopters.length > 0 && <p><strong>Ornithopters:</strong>{' '}{ornithopters.map(renderVehicle)}</p>}
+      {s.vehicles.length === 0 && <p className="hint">No vehicles on the board.</p>}
     </section>
   );
+}
+
+// Relocate any legion (either faction) by tapping a destination on the board map. Reuses the
+// editor's legion pick — the Board map applies the new area — so this is just a quick launcher.
+function MoveLegionPanel({
+  s,
+  onPick,
+  pick,
+}: {
+  s: GameState;
+  onPick: (target: PickTarget) => void;
+  pick: PickTarget | null;
+}) {
+  const legions = s.legions
+    .map((l, index) => ({ l, index }))
+    .filter(({ l }) => l.units.regular + l.units.elite + l.units.special_elite + l.deploymentTokens + l.leaders.length > 0);
+
+  return (
+    <section className="panel">
+      <h2>Move a legion</h2>
+      <p className="hint">Tap <strong>Move</strong>, then tap the destination area on the board map. Works for both factions.</p>
+      {legions.length === 0 ? (
+        <p className="hint">No legions on the board.</p>
+      ) : (
+        <div className="feature-list">
+          {legions.map(({ l, index }) => (
+            <div key={index} className="feature-row">
+              <span className="feature-name">
+                <span className={`faction-pill ${l.faction}`}>{l.faction === 'harkonnen' ? 'Harkonnen' : 'Atreides'}</span>{' '}
+                <AreaChip id={l.area} />
+                <span className="feature-sub">{legionSummary(l)}</span>
+              </span>
+              <button
+                type="button"
+                className={`pick-map-btn${samePick(pick, { kind: 'legion', index }) ? ' active' : ''}`}
+                title="Move this legion — pick the destination on the board map"
+                onClick={() => onPick({ kind: 'legion', index })}
+              >
+                📍 Move
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
+    </section>
+  );
+}
+
+// The directive rendered with area references as clickable chips (tap → open/find on the board map).
+function DirectiveText({ a }: { a: HarkonnenAction }) {
+  switch (a.kind) {
+    case 'attack_sietch':
+      return (
+        <>
+          Attack the sietch at <AreaChip id={a.sietch} /> with the Harkonnen legion in{' '}
+          <AreaChip id={a.attacker} />
+          {a.useOrnithopter ? ', using an ornithopter (troop-transport)' : ''}.
+        </>
+      );
+    case 'attack_legion':
+      return (
+        <>
+          Attack the Atreides legion in <AreaChip id={a.defender} /> with the Harkonnen legion in{' '}
+          <AreaChip id={a.attacker} />.
+        </>
+      );
+    case 'move':
+      return (
+        <>
+          Move the Harkonnen legion from <AreaChip id={a.path[0]} /> to{' '}
+          <AreaChip id={a.path[a.path.length - 1]} />.
+          {pathCrossesImpassable(a.path) && (
+            <em className="cross-impassable"> ({IMPASSABLE_NOTE})</em>
+          )}
+        </>
+      );
+    case 'deploy':
+      return (
+        <>
+          Deploy
+          {a.placements.map((p, i) => (
+            <span key={i}>
+              {i > 0 ? '; ' : ' '}
+              {unitsPhrase(p.units)}
+              {p.leader ? ` and ${p.leader}` : ''} in <AreaChip id={p.settlement} />
+            </span>
+          ))}
+          .
+        </>
+      );
+    case 'house_replace':
+      return (
+        <>
+          House: replace {a.count} regular unit{a.count === 1 ? '' : 's'} with elite
+          {a.count === 1 ? '' : 's'} in the legion at <AreaChip id={a.legion} />.
+        </>
+      );
+    default:
+      // mentat, house_place_vehicles, none — no area references to linkify
+      return <>{describeAction(a)}</>;
+  }
 }
 
 function ResolvePanel({ s, onApply }: { s: GameState; onApply: (next: GameState) => void }) {
@@ -267,7 +384,7 @@ function ResolvePanel({ s, onApply }: { s: GameState; onApply: (next: GameState)
       {action && (
         <div className="directive">
           <div className="directive-head">{actionHeadline(action)}</div>
-          <p className="directive-text">{describeAction(action)}</p>
+          <p className="directive-text"><DirectiveText a={action} /></p>
           <div className="directive-actions">
             {isAutoApplied(action) ? (
               <button className="confirm-btn" onClick={confirm}>
@@ -999,6 +1116,7 @@ interface BattlePair {
   defender: Legion;
 }
 
+/** Compact one-line legion summary: units, deployment tokens, and leaders. */
 function legionSummary(l: Legion): string {
   const parts: string[] = [];
   if (l.units.regular) parts.push(`${l.units.regular} reg`);
@@ -1314,8 +1432,10 @@ export function App() {
         <StateEditor s={s} onChange={setS} onPick={setPick} pick={pick} />
         <RoundPanel s={s} onChange={commit} />
         <PhasePanel s={s} onChange={setS} showAll={showAllPanels} onToggleShowAll={setShowAllPanels} />
-        {inPhase('vehicle_placement') && <VehiclePanel s={s} onChange={commit} />}
+        {inPhase('vehicle_placement') && <VehiclePanel s={s} onChange={commit} editable={false} />}
         {inPhase('action_resolution') && <ResolvePanel s={s} onApply={commit} />}
+        {inPhase('action_resolution') && <VehiclePanel s={s} onChange={commit} editable={true} />}
+        {inPhase('action_resolution') && <MoveLegionPanel s={s} onPick={setPick} pick={pick} />}
         {inPhase('action_resolution') && <BattlePanel s={s} onApply={commit} />}
         {inPhase('action_resolution') && <CardPanel s={s} onApply={commit} />}
         {inPhase('action_resolution') && <DesertPowerPanel s={s} onChange={setS} onPick={setPick} pick={pick} />}

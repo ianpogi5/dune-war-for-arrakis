@@ -12,8 +12,10 @@
 //    as deployment tokens (combat power 2, counting as 1 unit each), not specific figures.
 //  • The 3 Imperium markers start on the TOP step (best for the Harkonnen → 8 action dice).
 //  • Supremacy & Prescience tracks at 0. Wormsign pool 16, Tactical deck 8.
-//  • Solo: the two sets of Harkonnen Starting Deployment tokens (12) also form the replenishment
-//    POOL (rulebook p42) — dropped 2-at-a-time when a Harkonnen legion leaves a Settlement.
+//  • Solo: the two sets of Harkonnen Starting Deployment tokens (12) ARE those on-board garrisons
+//    (2 per settlement), so the replenishment pool (rulebook p42) starts empty and refills only as
+//    tokens are freed (revealed in battle). Leaving a settlement drops 2 tokens only when the pool
+//    has some — this keeps the 12 tokens conserved (no duplication when a garrison marches out).
 //  • Named leaders "in play at the start" (Beast Rabban, Baron Harkonnen, Captain Aramsham) are set
 //    aside as available-to-deploy (reserve), not pre-placed on the map.
 
@@ -99,7 +101,7 @@ export function newGameState(): GameState {
 
     harkonnenReserve: {
       units: { regular: 16, elite: 8, special_elite: 8 },
-      deploymentTokens: 12, // solo replenishment pool (rulebook p42); dropped 2 at a time when a legion leaves a settlement
+      deploymentTokens: 0, // pool starts empty — all 12 tokens are the on-board starting garrisons (2/settlement); refills as tokens are revealed in battle
       bashars: 2,
       namedLeaders: startLeaders,
       regenerationTank: [],
